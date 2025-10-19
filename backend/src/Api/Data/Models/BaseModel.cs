@@ -12,12 +12,14 @@ public class BaseModel
 
     public DateTime UpdatedAt { get; set; } = DateTime.UtcNow;
 
-    public List<INotification>? DomainEvents { get; private set; }
+    private List<INotification> _domainEvents;
+
+    public List<INotification> DomainEvents => _domainEvents;
 
     public void AddDomainEvent(INotification eventItem)
     {
-        DomainEvents ??= [];
-        DomainEvents.Add(eventItem);
+        _domainEvents ??= [];
+        _domainEvents.Add(eventItem);
     }
 
     public void RemoveDomainEvent(INotification eventItem)

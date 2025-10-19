@@ -37,6 +37,7 @@ public class AppDbContext
         modelBuilder.ApplyConfiguration(new ApplicationUserRoleConfiguration());
     }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
+    public DbSet<QRCode> QRCodes { get; set; }
 
     public override int SaveChanges()
     {
