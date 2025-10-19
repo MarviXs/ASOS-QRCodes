@@ -363,11 +363,6 @@ onMounted(() => {
   outline-offset: 2px;
 }
 
-.shape-selector {
-  border-top: 1px solid rgba(0, 0, 0, 0.08);
-  padding-top: 16px;
-}
-
 .shape-group__options {
   display: flex;
   gap: 12px;
