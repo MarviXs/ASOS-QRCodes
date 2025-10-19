@@ -16,7 +16,11 @@ const routes: RouteRecordRaw[] = [
       },
       {
         path: '/qr-codes/create',
-        component: () => import('pages/qr-codes/QRCodeCreate.vue'),
+        component: () => import('pages/qr-codes/QRCodeCreatePage.vue'),
+      },
+      {
+        path: '/qr-codes/:id/edit',
+        component: () => import('pages/qr-codes/QRCodeEditPage.vue'),
       }
     ]
   },
