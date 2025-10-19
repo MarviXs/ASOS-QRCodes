@@ -1,10 +1,11 @@
+using System;
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
-using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
+using Fei.Is.Api.Features.QRCodes.Extensions;
 using FluentResults;
 using FluentValidation;
 using MediatR;
@@ -58,11 +59,13 @@ public static class CreateQRCode
                 return Result.Fail(new ValidationError(result));
             }
 
+            var normalizedRedirectUrl = message.Request.RedirectUrl.EnsureHttpsScheme();
+
             var qrCode = new QRCode
             {
                 OwnerId = message.User.GetUserId(),
                 DisplayName = message.Request.DisplayName,
-                RedirectUrl = message.Request.RedirectUrl,
+                RedirectUrl = normalizedRedirectUrl,
                 ShortCode = message.Request.ShortCode,
                 DotStyle = message.Request.DotStyle,
                 CornerDotStyle = message.Request.CornerDotStyle,

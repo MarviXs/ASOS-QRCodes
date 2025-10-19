@@ -1,3 +1,4 @@
+using System;
 using System.Security.Claims;
 using Carter;
 using Fei.Is.Api.Common.Errors;
@@ -90,8 +91,10 @@ public static class UpdateQRCode
                 return Result.Fail(new ForbiddenError());
             }
 
+            var normalizedRedirectUrl = message.Request.RedirectUrl.EnsureHttpsScheme();
+
             qrCode.DisplayName = message.Request.DisplayName;
-            qrCode.RedirectUrl = message.Request.RedirectUrl;
+            qrCode.RedirectUrl = normalizedRedirectUrl;
             qrCode.ShortCode = message.Request.ShortCode;
             qrCode.DotStyle = message.Request.DotStyle;
             qrCode.CornerDotStyle = message.Request.CornerDotStyle;
@@ -103,6 +106,7 @@ public static class UpdateQRCode
 
             return Result.Ok();
         }
+
     }
 
     public record Response(Guid Id, string Name, long? ResponseTime, long? LastResponseTimestamp);
