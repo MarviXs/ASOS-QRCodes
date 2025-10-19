@@ -1,0 +1,14 @@
+# Redirect HTTP to HTTPS
+http:// {
+    redir https://qr.smogrovic.com 
+}
+
+https://qr.smogrovic.com {
+    reverse_proxy frontend:80
+}
+
+https://qr-api.smogrovic.com {
+    reverse_proxy backend:8080 {
+        # Default settings for all paths
+    }
+}

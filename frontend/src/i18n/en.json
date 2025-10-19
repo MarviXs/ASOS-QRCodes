@@ -1,0 +1,20 @@
+{
+  "auth": {
+    "login": {
+      "label": "Login",
+      "login_btn": "Log In",
+      "no_account": "Don't have an account?",
+      "sign_up": "Sign Up"
+    },
+    "register": {
+      "label": "Register",
+      "register_btn": "Sign Up",
+      "have_account": "Already have an account?",
+      "login": "Log In"
+    }
+  },
+  "account": {
+    "email": "Email Address",
+    "password": "Password"
+  }
+}

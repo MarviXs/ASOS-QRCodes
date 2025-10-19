@@ -1,0 +1,50 @@
+name: qr-manager
+services:
+  frontend:
+    restart: unless-stopped
+    image: marvixs/qr-frontend
+    build:
+      context: ../frontend
+    environment:
+      - API_URL=${API_URL}
+    ports:
+      - 8000:80
+    networks:
+      - out-network
+  backend:
+    restart: unless-stopped
+    image: marvixs/qr-backend
+    build:
+      context: ../backend/src/Api
+      dockerfile: Dockerfile
+    environment:
+      - ASPNETCORE_ENVIRONMENT=Production
+      - ConnectionStrings__PostgresConnection=Host=pg;Port=5432;Database=qr_db;Username=qr_user;Password=${POSTGRES_PASSWORD}
+      - JwtSettings__Secret=${JWT_SECRET}
+      - JwtSettings__ValidIssuer=${JWT_ISSUER}
+      - JwtSettings__ValidAudience=${JWT_AUDIENCE}
+      - Cors__AllowedOrigins=${CORS_ALLOWED_ORIGINS}
+    ports:
+      - 9001:8080
+    networks:
+      - int-network
+      - out-network
+  pg:
+    image: postgres:18.0-alpine3.22
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: qr_user
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_DB: qr_db
+    ports:
+      - 5432:5432
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    networks:
+      - int-network
+volumes:
+  pgdata:
+
+networks:
+  int-network:
+  out-network:
