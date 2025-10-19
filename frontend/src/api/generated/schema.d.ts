@@ -167,11 +167,19 @@ export interface components {
             displayName: string;
             redirectUrl: string;
             shortCode: string;
+            dotStyle: string;
+            cornerDotStyle: string;
+            cornerSquareStyle: string;
+            color: string;
         };
         "Fei.Is.Api.Features.QRCodes.Commands.UpdateQRCode.Request": {
             displayName: string;
             redirectUrl: string;
             shortCode: string;
+            dotStyle: string;
+            cornerDotStyle: string;
+            cornerSquareStyle: string;
+            color: string;
         };
         "Fei.Is.Api.Features.QRCodes.Queries.GetQRCodeById.Response": {
             /** Format: uuid */
