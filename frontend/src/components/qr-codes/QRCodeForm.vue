@@ -15,13 +15,16 @@
           </q-input>
           <q-input
             v-model="colorInput"
-            label="Foreground color"
+            label="Color"
             class="color-input q-mb-xl"
             spellcheck="false"
             autocorrect="off"
             autocomplete="off"
             maxlength="7"
           >
+            <template #prepend>
+              <q-icon :name="mdiPalette" />
+            </template>
             <template #append>
               <div
                 class="color-chip"
@@ -129,7 +132,7 @@
 </template>
 
 <script setup lang="ts">
-import { mdiLinkVariant, mdiPencil } from '@quasar/extras/mdi-v7';
+import { mdiLinkVariant, mdiPalette, mdiPencil } from '@quasar/extras/mdi-v7';
 import { computed, onMounted, ref, watch } from 'vue';
 import QRCodeStyling, { type CornerDotType, type CornerSquareType, type DotType } from 'qr-code-styling';
 
