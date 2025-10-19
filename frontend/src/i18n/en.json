@@ -1,4 +1,15 @@
 {
+  "global": {
+    "name": "Name",
+    "search": "Search...",
+    "account": "Account"
+  },
+  "table": {
+    "no_data_label": "No data available",
+    "loading_label": "Loading...",
+    "rows_per_page_label": "Rows per page:"
+  },
+
   "auth": {
     "login": {
       "label": "Login",
@@ -23,6 +34,7 @@
   },
   "account": {
     "email": "Email Address",
-    "password": "Password"
+    "password": "Password",
+    "logout": "Log Out"
   }
 }

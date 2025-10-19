@@ -10,6 +10,10 @@ const routes: RouteRecordRaw[] = [
         path: '',
         redirect: '/qr-codes',
       },
+      {
+        path: '/qr-codes',
+        component: () => import('pages/qr-codes/QRCodesListPage.vue'),
+      }
     ]
   },
   {
