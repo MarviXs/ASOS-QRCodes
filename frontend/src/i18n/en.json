@@ -4,13 +4,21 @@
       "label": "Login",
       "login_btn": "Log In",
       "no_account": "Don't have an account?",
-      "sign_up": "Sign Up"
+      "sign_up": "Sign Up",
+      "toasts": {
+        "login_success": "Successfully logged in!",
+        "login_failed": "Login failed. Please check your credentials."
+      }
     },
     "register": {
       "label": "Register",
       "register_btn": "Sign Up",
       "have_account": "Already have an account?",
-      "login": "Log In"
+      "login": "Log In",
+      "toasts": {
+        "register_success": "Registration successful! Please log in.",
+        "register_failed": "Registration failed. Please try again."
+      }
     }
   },
   "account": {
