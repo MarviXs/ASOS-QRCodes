@@ -2,16 +2,16 @@
   <PageLayout :breadcrumbs="[{ label: 'QR Codes', to: '/qr-codes' }]">
     <template #actions>
       <SearchBar v-model="filter" class="col-grow col-lg-auto" />
-      <!-- <q-btn
+      <q-btn
         class="shadow col-grow col-lg-auto"
         color="primary"
         unelevated
         no-caps
         size="15px"
-        label="Create Template"
+        label="Create QR Code"
         :icon="mdiPlus"
-        to="/device-templates/create"
-      /> -->
+        to="/qr-codes/create"
+      />
     </template>
     <template #default>
       <q-table
@@ -62,7 +62,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { mdiCodeTags, mdiPencil, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiCodeTags, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
@@ -124,11 +124,33 @@ function openDeleteDialog(id: string) {
 
 const columns = computed<QTableProps['columns']>(() => [
   {
-    name: 'name',
+    name: 'displayName',
     label: t('global.name'),
-    field: 'name',
+    field: 'displayName',
     sortable: true,
     align: 'left',
+  },
+
+  {
+    name: 'updatedAt',
+    label: 'Updated At',
+    field: 'updatedAt',
+    sortable: true,
+    format(val) {
+      return new Date(val).toLocaleString(locale.value);
+    },
+    align: 'right',
+  },
+
+  {
+    name: 'createdAt',
+    label: 'Created At',
+    field: 'createdAt',
+    sortable: true,
+    format(val) {
+      return new Date(val).toLocaleString(locale.value);
+    },
+    align: 'right',
   },
 
   {
