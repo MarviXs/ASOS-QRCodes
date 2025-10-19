@@ -48,10 +48,10 @@ async function fetchQRCode() {
   qrCodeData.value.displayName = data.displayName;
   qrCodeData.value.redirectUrl = data.redirectUrl;
   qrCodeData.value.shortCode = data.shortCode;
-  qrCodeData.value.dotStyle = data.dotStyle as typeof qrCodeData.value.dotStyle;
-  qrCodeData.value.cornerDotStyle = data.cornerDotStyle as typeof qrCodeData.value.cornerDotStyle;
-  qrCodeData.value.cornerSquareStyle = data.cornerSquareStyle as typeof qrCodeData.value.cornerSquareStyle;
-  qrCodeData.value.color = data.color;
+  qrCodeData.value.dotStyle = (data.dotStyle ?? 'square') as typeof qrCodeData.value.dotStyle;
+  qrCodeData.value.cornerDotStyle = (data.cornerDotStyle ?? 'square') as typeof qrCodeData.value.cornerDotStyle;
+  qrCodeData.value.cornerSquareStyle = (data.cornerSquareStyle ?? 'square') as typeof qrCodeData.value.cornerSquareStyle;
+  qrCodeData.value.color = data.color ?? '#000000';
 }
 fetchQRCode();
 

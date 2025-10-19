@@ -13,6 +13,38 @@
               <q-icon :name="mdiLinkVariant" />
             </template>
           </q-input>
+          <q-input
+            v-model="colorInput"
+            label="Foreground color"
+            class="color-input q-mb-xl"
+            spellcheck="false"
+            autocorrect="off"
+            autocomplete="off"
+            maxlength="7"
+          >
+            <template #append>
+              <div
+                class="color-chip"
+                role="button"
+                tabindex="0"
+                :style="{ backgroundColor: circleColor }"
+                :aria-label="`Open color picker for ${circleColor}`"
+                @click.stop.prevent="openColorPicker"
+                @keyup.enter.prevent="openColorPicker"
+                @keydown.space.prevent="openColorPicker"
+              >
+                <q-popup-proxy
+                  ref="colorPickerProxy"
+                  no-parent-event
+                  transition-show="scale"
+                  transition-hide="scale"
+                  cover
+                >
+                  <q-color v-model="colorInput" format-model="hex" default-view="palette" square />
+                </q-popup-proxy>
+              </div>
+            </template>
+          </q-input>
           <div class="shape-selector q-mb-xl">
             <div class="shape-group q-mb-lg">
               <div class="shape-group__title text-subtitle2 text-weight-medium q-mb-sm">Body</div>
@@ -98,16 +130,16 @@
 
 <script setup lang="ts">
 import { mdiLinkVariant, mdiPencil } from '@quasar/extras/mdi-v7';
-import { onMounted, ref, watch } from 'vue';
-import QRCodeStyling, { type DotType } from 'qr-code-styling';
+import { computed, onMounted, ref, watch } from 'vue';
+import QRCodeStyling, { type CornerDotType, type CornerSquareType, type DotType } from 'qr-code-styling';
 
 export interface QRCodeFormData {
   displayName: string;
   redirectUrl: string;
   shortCode: string;
   dotStyle: DotType;
-  cornerDotStyle: DotType;
-  cornerSquareStyle: DotType;
+  cornerDotStyle: CornerDotType;
+  cornerSquareStyle: CornerSquareType;
   color: string;
 }
 defineProps({
@@ -119,6 +151,16 @@ defineProps({
 const emit = defineEmits(['onSubmit']);
 const qrCodeData = defineModel<QRCodeFormData>();
 
+const fallbackColor = '#000000';
+const colorInput = ref(fallbackColor);
+type PopupProxyExpose = {
+  show: () => void;
+  hide: () => void;
+};
+
+const colorPickerProxy = ref<PopupProxyExpose | null>(null);
+const circleColor = computed(() => qrCodeData.value.color || fallbackColor);
+
 const qrcodeRef = ref<HTMLElement | null>(null);
 const qrCodeStyle = ref<QRCodeStyling>(
   new QRCodeStyling({
@@ -126,7 +168,7 @@ const qrCodeStyle = ref<QRCodeStyling>(
     height: 200,
     data: `https://qr.smogrovic.com/code/${qrCodeData.value.shortCode}`,
     dotsOptions: {
-      color: qrCodeData.value.color || '#000000',
+      color: circleColor.value,
       type: qrCodeData.value.dotStyle || 'square',
     },
     cornersSquareOptions: {
@@ -144,6 +186,41 @@ const qrCodeStyle = ref<QRCodeStyling>(
     },
   }),
 );
+
+function normalizeHex(value: string | undefined | null) {
+  if (!value) {
+    return undefined;
+  }
+  const trimmed = value.trim();
+  if (!trimmed) {
+    return undefined;
+  }
+  const shortMatch = /^#?([0-9a-fA-F]{3})$/.exec(trimmed);
+  if (shortMatch) {
+    const [r, g, b] = shortMatch[1].split('');
+    return `#${(r + r + g + g + b + b).toLowerCase()}`;
+  }
+  const match = /^#?([0-9a-fA-F]{6})$/.exec(trimmed);
+  if (match) {
+    return `#${match[1].toLowerCase()}`;
+  }
+  return undefined;
+}
+
+watch(
+  () => qrCodeData.value.color,
+  (newColor) => {
+    colorInput.value = newColor || fallbackColor;
+  },
+  { immediate: true },
+);
+
+watch(colorInput, (newValue) => {
+  const normalized = normalizeHex(newValue);
+  if (normalized && qrCodeData.value.color !== normalized) {
+    qrCodeData.value.color = normalized;
+  }
+});
 
 const bodyShapeOptions = [
   {
@@ -214,11 +291,11 @@ function selectBodyShape(value: (typeof bodyShapeOptions)[number]['value']) {
 }
 
 function selectOuterEye(value: (typeof outerEyeOptions)[number]['value']) {
-  qrCodeData.value.cornerSquareStyle = value as DotType;
+  qrCodeData.value.cornerSquareStyle = value;
 }
 
 function selectInnerEye(value: (typeof innerEyeOptions)[number]['value']) {
-  qrCodeData.value.cornerDotStyle = value as DotType;
+  qrCodeData.value.cornerDotStyle = value;
 }
 
 function handleSubmit() {
@@ -229,7 +306,7 @@ function updateQRCodePreview() {
   qrCodeStyle.value.update({
     data: `https://qr.smogrovic.com/code/${qrCodeData.value.shortCode}`,
     dotsOptions: {
-      color: qrCodeData.value.color || '#000000',
+      color: circleColor.value,
       type: qrCodeData.value.dotStyle || 'square',
     },
     cornersSquareOptions: {
@@ -252,6 +329,10 @@ watch(
   updateQRCodePreview,
 );
 
+function openColorPicker() {
+  colorPickerProxy.value?.show();
+}
+
 onMounted(() => {
   if (qrcodeRef.value) {
     console.log('Appending QR code to the DOM element.');
@@ -262,6 +343,26 @@ onMounted(() => {
 </script>
 
 <style scoped>
+.color-input :deep(.q-field__append) {
+  display: flex;
+  align-items: center;
+}
+
+.color-chip {
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  border: 2px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 0 0 1px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  outline: none;
+}
+
+.color-chip:focus-visible {
+  outline: 2px solid var(--q-primary);
+  outline-offset: 2px;
+}
+
 .shape-selector {
   border-top: 1px solid rgba(0, 0, 0, 0.08);
   padding-top: 16px;

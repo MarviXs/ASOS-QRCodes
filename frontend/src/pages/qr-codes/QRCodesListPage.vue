@@ -35,9 +35,22 @@
           </div>
         </template>
 
+        <template #body-cell-qrCode="props">
+          <q-td :props="props" auto-width>
+            <QRCodePreview
+              :short-code="props.row.shortCode"
+              :display-name="props.row.displayName"
+              :dot-style="props.row.dotStyle"
+              :corner-dot-style="props.row.cornerDotStyle"
+              :corner-square-style="props.row.cornerSquareStyle"
+              :color="props.row.color"
+            />
+          </q-td>
+        </template>
+
         <template #body-cell-name="props">
           <q-td :props="props">
-            <RouterLink :to="`/device-templates/${props.row.id}`">{{ props.row.name }}</RouterLink>
+            <RouterLink :to="`/qr-codes/${props.row.id}/edit`">{{ props.row.displayName }}</RouterLink>
           </q-td>
         </template>
 
@@ -74,6 +87,7 @@ import type { QRCodeQueryParams, QRCodeResponse } from '@/api/services/QRCodeSer
 import type { QTableProps } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
 import DeleteQRCodeDialog from '@/components/qr-codes/DeleteQRCodeDialog.vue';
+import QRCodePreview from '@/components/qr-codes/QRCodePreview.vue';
 
 const { t, locale } = useI18n();
 const filter = ref('');
@@ -126,10 +140,25 @@ function openDeleteDialog(id: string) {
 
 const columns = computed<QTableProps['columns']>(() => [
   {
+    name: 'qrCode',
+    label: 'QR Code',
+    field: 'shortCode',
+    sortable: false,
+    align: 'left',
+  },
+  {
     name: 'displayName',
     label: t('global.name'),
     field: 'displayName',
     sortable: true,
+    align: 'left',
+  },
+
+  {
+    name: 'redirectUrl',
+    label: t('global.url'),
+    field: 'redirectUrl',
+    sortable: false,
     align: 'left',
   },
 
@@ -148,17 +177,6 @@ const columns = computed<QTableProps['columns']>(() => [
     name: 'createdAt',
     label: 'Created At',
     field: 'createdAt',
-    sortable: true,
-    format(val) {
-      return new Date(val).toLocaleString(locale.value);
-    },
-    align: 'right',
-  },
-
-  {
-    name: 'updatedAt',
-    label: 'Updated At',
-    field: 'updatedAt',
     sortable: true,
     format(val) {
       return new Date(val).toLocaleString(locale.value);
