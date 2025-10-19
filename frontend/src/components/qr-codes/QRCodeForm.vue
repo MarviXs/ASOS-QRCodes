@@ -46,6 +46,10 @@ export interface QRCodeFormData {
   displayName: string;
   redirectUrl: string;
   shortCode: string;
+  dotStyle: string;
+  cornerDotStyle: string;
+  cornerSquareStyle: string;
+  color: string;
 }
 defineProps({
   isLoading: {

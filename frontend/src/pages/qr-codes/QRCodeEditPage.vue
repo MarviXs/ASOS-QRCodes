@@ -27,6 +27,10 @@ const qrCodeData = ref<QRCodeFormData>({
   displayName: '',
   redirectUrl: '',
   shortCode: '',
+  dotStyle: '',
+  cornerDotStyle: '',
+  cornerSquareStyle: '',
+  color: '',
 });
 const isLoading = ref(false);
 
@@ -53,6 +57,10 @@ async function updateQRCode(data: QRCodeFormData) {
     displayName: data.displayName,
     redirectUrl: data.redirectUrl,
     shortCode: data.shortCode,
+    dotStyle: data.dotStyle,
+    cornerDotStyle: data.cornerDotStyle,
+    cornerSquareStyle: data.cornerSquareStyle,
+    color: data.color,
   });
 
   isLoading.value = false;
