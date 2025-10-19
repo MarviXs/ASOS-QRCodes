@@ -13,11 +13,6 @@
               <q-icon :name="mdiLinkVariant" />
             </template>
           </q-input>
-          <q-input v-model="qrCodeData.shortCode" label="Short Link" class="q-mb-md" prefix="qr.smogrovic.com/code/">
-            <template v-slot:prepend>
-              <q-icon :name="mdiPencil" />
-            </template>
-          </q-input>
           <div class="row justify-end">
             <q-btn
               label="Create QR Code"
@@ -44,7 +39,7 @@
 
 <script setup lang="ts">
 import { mdiLinkVariant, mdiPencil } from '@quasar/extras/mdi-v7';
-import { onMounted, ref, watch } from 'vue';
+import { onMounted, ref } from 'vue';
 import QRCodeStyling from 'qr-code-styling';
 
 export interface QRCodeFormData {
@@ -80,12 +75,6 @@ const qrCodeStyle = ref<QRCodeStyling>(
   }),
 );
 
-function updateQRCode() {
-  qrCodeStyle.value.update({
-    data: `https://qr.smogrovic.com/code/${qrCodeData.value.shortCode}`,
-  });
-}
-
 function handleSubmit() {
   emit('onSubmit', qrCodeData.value);
 }
@@ -96,12 +85,4 @@ onMounted(() => {
     qrCodeStyle.value.append(qrcodeRef.value);
   }
 });
-
-watch(
-  () => qrCodeData.value.shortCode,
-  () => {
-    updateQRCode();
-  },
-  { deep: true },
-);
 </script>

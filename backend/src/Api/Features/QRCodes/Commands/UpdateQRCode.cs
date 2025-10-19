@@ -15,7 +15,15 @@ namespace Fei.Is.Api.Features.QRCodes.Commands;
 
 public static class UpdateQRCode
 {
-    public record Request(string DisplayName, string RedirectUrl, string ShortCode);
+    public record Request(
+        string DisplayName,
+        string RedirectUrl,
+        string ShortCode,
+        string DotStyle,
+        string CornerDotStyle,
+        string CornerSquareStyle,
+        string Color
+    );
 
     public sealed class Endpoint : ICarterModule
     {
@@ -85,6 +93,11 @@ public static class UpdateQRCode
             qrCode.DisplayName = message.Request.DisplayName;
             qrCode.RedirectUrl = message.Request.RedirectUrl;
             qrCode.ShortCode = message.Request.ShortCode;
+            qrCode.DotStyle = message.Request.DotStyle;
+            qrCode.CornerDotStyle = message.Request.CornerDotStyle;
+            qrCode.CornerSquareStyle = message.Request.CornerSquareStyle;
+            qrCode.Color = message.Request.Color;
+            context.QRCodes.Update(qrCode);
 
             await context.SaveChangesAsync(cancellationToken);
 
@@ -101,6 +114,10 @@ public static class UpdateQRCode
             RuleFor(r => r.Request.DisplayName).NotEmpty().WithMessage("Display name is required");
             RuleFor(r => r.Request.RedirectUrl).NotEmpty().WithMessage("Redirect URL is required");
             RuleFor(r => r.Request.ShortCode).NotEmpty().WithMessage("Short code is required");
+            RuleFor(r => r.Request.DotStyle).NotEmpty().WithMessage("Dot style is required");
+            RuleFor(r => r.Request.CornerDotStyle).NotEmpty().WithMessage("Corner dot style is required");
+            RuleFor(r => r.Request.CornerSquareStyle).NotEmpty().WithMessage("Corner square style is required");
+            RuleFor(r => r.Request.Color).NotEmpty().WithMessage("Color is required");
         }
     }
 }

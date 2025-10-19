@@ -58,6 +58,7 @@
       </q-table>
     </template>
   </PageLayout>
+  <DeleteQRCodeDialog v-model="deleteDialogOpen" :qrcode-id="deleteQRCodeId" @on-deleted="getQRcodes(pagination)" />
 </template>
 
 <script setup lang="ts">
@@ -72,6 +73,7 @@ import { handleError } from '@/utils/error-handler';
 import type { QRCodeQueryParams, QRCodeResponse } from '@/api/services/QRCodeService';
 import type { QTableProps } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
+import DeleteQRCodeDialog from '@/components/qr-codes/DeleteQRCodeDialog.vue';
 
 const { t, locale } = useI18n();
 const filter = ref('');

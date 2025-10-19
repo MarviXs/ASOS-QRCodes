@@ -14,7 +14,7 @@ namespace Fei.Is.Api.Features.QRCodes.Commands;
 
 public static class CreateQRCode
 {
-    public record Request(string DisplayName, string RedirectUrl, string ShortCode);
+    public record Request(string DisplayName, string RedirectUrl, string ShortCode, string DotStyle, string CornerDotStyle, string CornerSquareStyle, string Color);
 
     public sealed class Endpoint : ICarterModule
     {
@@ -64,6 +64,10 @@ public static class CreateQRCode
                 DisplayName = message.Request.DisplayName,
                 RedirectUrl = message.Request.RedirectUrl,
                 ShortCode = message.Request.ShortCode,
+                DotStyle = message.Request.DotStyle,
+                CornerDotStyle = message.Request.CornerDotStyle,
+                CornerSquareStyle = message.Request.CornerSquareStyle,
+                Color = message.Request.Color
             };
             await context.QRCodes.AddAsync(qrCode, cancellationToken);
             await context.SaveChangesAsync(cancellationToken);
@@ -79,6 +83,10 @@ public static class CreateQRCode
             RuleFor(r => r.Request.DisplayName).NotEmpty().WithMessage("Display name is required");
             RuleFor(r => r.Request.RedirectUrl).NotEmpty().WithMessage("Redirect URL is required");
             RuleFor(r => r.Request.ShortCode).NotEmpty().WithMessage("Short code is required");
+            RuleFor(r => r.Request.DotStyle).NotEmpty().WithMessage("Dot style is required");
+            RuleFor(r => r.Request.CornerDotStyle).NotEmpty().WithMessage("Corner dot style is required");
+            RuleFor(r => r.Request.CornerSquareStyle).NotEmpty().WithMessage("Corner square style is required");
+            RuleFor(r => r.Request.Color).NotEmpty().WithMessage("Color is required");
         }
     }
 }

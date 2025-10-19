@@ -2,7 +2,10 @@
   "global": {
     "name": "Name",
     "search": "Search...",
-    "account": "Account"
+    "account": "Account",
+    "edit": "Edit",
+    "delete": "Delete",
+    "cancel": "Cancel"
   },
   "table": {
     "no_data_label": "No data available",
@@ -30,6 +33,13 @@
         "register_success": "Registration successful! Please log in.",
         "register_failed": "Registration failed. Please try again."
       }
+    }
+  },
+  "qrcode": {
+    "delete_qrcode": "Delete QR Code",
+    "delete_qrcode_desc": "Are you sure you want to delete this QR code?",
+    "toasts": {
+      "delete_success": "QR code deleted successfully."
     }
   },
   "account": {
