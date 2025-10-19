@@ -20,14 +20,6 @@ class AuthService {
   async register(body: RegisterRequest) {
     return await client.POST('/auth/register', { body });
   }
-
-  async updatePassword(oldPassword: string, newPassword: string) {
-    return await client.PUT('/auth/password', { body: { oldPassword, newPassword } });
-  }
-
-  async updateEmail(email: string) {
-    return await client.PUT('/auth/email', { body: { newEmail: email } });
-  }
 }
 
 export default new AuthService();
