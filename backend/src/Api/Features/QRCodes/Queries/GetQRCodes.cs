@@ -63,7 +63,11 @@ public static class GetQRCodes
                     qrCode.RedirectUrl,
                     qrCode.ShortCode,
                     qrCode.CreatedAt,
-                    qrCode.UpdatedAt
+                    qrCode.UpdatedAt,
+                    qrCode.DotStyle,
+                    qrCode.CornerDotStyle,
+                    qrCode.CornerSquareStyle,
+                    qrCode.Color
                 ))
                 .ToList();
 
@@ -71,5 +75,16 @@ public static class GetQRCodes
         }
     }
 
-    public record Response(Guid Id, string DisplayName, string RedirectUrl, string ShortCode, DateTime CreatedAt, DateTime UpdatedAt);
+    public record Response(
+        Guid Id,
+        string DisplayName,
+        string RedirectUrl,
+        string ShortCode,
+        DateTime CreatedAt,
+        DateTime UpdatedAt,
+        string DotStyle,
+        string CornerDotStyle,
+        string CornerSquareStyle,
+        string Color
+    );
 }

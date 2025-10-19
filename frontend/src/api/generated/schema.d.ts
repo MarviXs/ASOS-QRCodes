@@ -187,8 +187,10 @@ export interface components {
             displayName: string;
             redirectUrl: string;
             shortCode: string;
-            /** Format: uuid */
-            ownerId: string;
+            dotStyle: string;
+            cornerDotStyle: string;
+            cornerSquareStyle: string;
+            color: string;
         };
         "Fei.Is.Api.Features.QRCodes.Queries.GetQRCodes.Response": {
             /** Format: uuid */
@@ -200,6 +202,10 @@ export interface components {
             createdAt: string;
             /** Format: date-time */
             updatedAt: string;
+            dotStyle: string;
+            cornerDotStyle: string;
+            cornerSquareStyle: string;
+            color: string;
         };
         "Microsoft.AspNetCore.Http.HttpValidationProblemDetails": {
             type?: string | null;

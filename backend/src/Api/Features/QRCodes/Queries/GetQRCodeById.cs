@@ -63,11 +63,29 @@ public static class GetQRCodeById
                 return Result.Fail(new ForbiddenError());
             }
 
-            var response = new Response(qrCode.Id, qrCode.DisplayName, qrCode.RedirectUrl, qrCode.ShortCode, qrCode.OwnerId);
+            var response = new Response(
+                qrCode.Id,
+                qrCode.DisplayName,
+                qrCode.RedirectUrl,
+                qrCode.ShortCode,
+                qrCode.DotStyle,
+                qrCode.CornerDotStyle,
+                qrCode.CornerSquareStyle,
+                qrCode.Color
+            );
 
             return Result.Ok(response);
         }
     }
 
-    public record Response(Guid Id, string DisplayName, string RedirectUrl, string ShortCode, Guid OwnerId);
+    public record Response(
+        Guid Id,
+        string DisplayName,
+        string RedirectUrl,
+        string ShortCode,
+        string DotStyle,
+        string CornerDotStyle,
+        string CornerSquareStyle,
+        string Color
+    );
 }
