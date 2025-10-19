@@ -54,6 +54,21 @@
           </q-td>
         </template>
 
+        <template #body-cell-redirectUrl="props">
+          <q-td :props="props">
+            <a
+              v-if="props.row.redirectUrl"
+              class="qr-url"
+              :href="normalizeHref(props.row.redirectUrl, props.row.shortCode)"
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              {{ formatUrl(props.row.redirectUrl, props.row.shortCode) }}
+            </a>
+            <span v-else class="qr-url--missing">—</span>
+          </q-td>
+        </template>
+
         <template #body-cell-actions="props">
           <q-td auto-width :props="props">
             <q-btn :icon="mdiPencil" color="grey-color" flat round :to="`/qr-codes/${props.row.id}/edit`">
@@ -105,6 +120,27 @@ const qrCodes = computed(() => qrCodesPaginated.value?.items ?? []);
 const loadingQR = ref(false);
 const deleteDialogOpen = ref(false);
 const deleteQRCodeId = ref<string>();
+
+function normalizeHref(url: string, shortCode: string) {
+  const trimmed = url?.trim?.() ?? '';
+  if (!trimmed) {
+    return `https://qr.smogrovic.com/code/${shortCode}`;
+  }
+  if (/^https?:\/\//i.test(trimmed)) {
+    return trimmed;
+  }
+  return `https://${trimmed}`;
+}
+
+function formatUrl(url: string, shortCode: string) {
+  const href = normalizeHref(url, shortCode);
+  try {
+    const parsed = new URL(href);
+    return parsed.host + parsed.pathname.replace(/\/$/, '');
+  } catch {
+    return href.replace(/^https?:\/\//i, '');
+  }
+}
 
 async function getQRcodes(paginationTable: PaginationTable) {
   const paginationQuery: QRCodeQueryParams = {
@@ -195,3 +231,18 @@ const columns = computed<QTableProps['columns']>(() => [
 
 watchDebounced(filter, () => getQRcodes(pagination.value), { debounce: 400 });
 </script>
+
+<style scoped>
+.qr-url {
+  color: var(--q-primary);
+  text-decoration: none;
+}
+
+.qr-url:hover {
+  text-decoration: underline;
+}
+
+.qr-url--missing {
+  color: rgba(0, 0, 0, 0.4);
+}
+</style>
