@@ -103,6 +103,7 @@ import type { QTableProps } from 'quasar';
 import { watchDebounced } from '@vueuse/core';
 import DeleteQRCodeDialog from '@/components/qr-codes/DeleteQRCodeDialog.vue';
 import QRCodePreview from '@/components/qr-codes/QRCodePreview.vue';
+import { buildScanUrl } from '@/utils/qr-url';
 
 const { t, locale } = useI18n();
 const filter = ref('');
@@ -124,7 +125,7 @@ const deleteQRCodeId = ref<string>();
 function normalizeHref(url: string, shortCode: string) {
   const trimmed = url?.trim?.() ?? '';
   if (!trimmed) {
-    return `https://qr.smogrovic.com/code/${shortCode}`;
+    return buildScanUrl(shortCode);
   }
   if (/^https?:\/\//i.test(trimmed)) {
     return trimmed;

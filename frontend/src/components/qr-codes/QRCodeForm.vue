@@ -135,6 +135,7 @@
 import { mdiLinkVariant, mdiPalette, mdiPencil } from '@quasar/extras/mdi-v7';
 import { computed, onMounted, ref, watch } from 'vue';
 import QRCodeStyling, { type CornerDotType, type CornerSquareType, type DotType } from 'qr-code-styling';
+import { buildScanUrl } from '@/utils/qr-url';
 
 export interface QRCodeFormData {
   displayName: string;
@@ -169,7 +170,7 @@ const qrCodeStyle = ref<QRCodeStyling>(
   new QRCodeStyling({
     width: 200,
     height: 200,
-    data: `https://qr.smogrovic.com/code/${qrCodeData.value.shortCode}`,
+    data: buildScanUrl(qrCodeData.value.shortCode),
     dotsOptions: {
       color: circleColor.value,
       type: qrCodeData.value.dotStyle || 'square',
@@ -307,7 +308,7 @@ function handleSubmit() {
 
 function updateQRCodePreview() {
   qrCodeStyle.value.update({
-    data: `https://qr.smogrovic.com/code/${qrCodeData.value.shortCode}`,
+    data: buildScanUrl(qrCodeData.value.shortCode),
     dotsOptions: {
       color: circleColor.value,
       type: qrCodeData.value.dotStyle || 'square',

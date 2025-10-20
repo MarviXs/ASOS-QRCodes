@@ -7,8 +7,8 @@
 <script setup lang="ts">
 import { computed, onBeforeUnmount, onMounted, ref, watch } from 'vue';
 import QRCodeStyling, { type CornerDotType, type CornerSquareType, type DotType } from 'qr-code-styling';
+import { buildScanUrl } from '@/utils/qr-url';
 
-const QR_BASE_URL = 'https://qr.smogrovic.com/code/';
 const PREVIEW_SIZE = 70;
 
 const props = defineProps<{
@@ -24,7 +24,7 @@ const qrContainer = ref<HTMLDivElement | null>(null);
 const qrInstance = ref<QRCodeStyling>();
 
 const normalizedColor = computed(() => props.color || '#000000');
-const encodedUrl = computed(() => `${QR_BASE_URL}${props.shortCode}`);
+const encodedUrl = computed(() => buildScanUrl(props.shortCode));
 
 function renderQrCode() {
   if (!qrInstance.value) {
