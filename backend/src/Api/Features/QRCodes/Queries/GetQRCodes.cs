@@ -49,6 +49,7 @@ public static class GetQRCodes
 
             var query = context
                 .QRCodes.AsNoTracking()
+                .Where(qrCode => qrCode.OwnerId == message.User.GetUserId())
                 .Where(d => d.DisplayName.ToLower().Contains(StringUtils.Normalized(qrCodeParameters.SearchTerm)))
                 .Sort(qrCodeParameters.SortBy ?? nameof(QRCode.UpdatedAt), qrCodeParameters.Descending);
 
