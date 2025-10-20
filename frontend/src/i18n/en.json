@@ -58,7 +58,16 @@
     "last_90_days": "Last 90 Days",
     "custom": "Custom",
     "custom_range_title": "Custom Date Range",
-    "apply_range": "Apply"
+    "apply_range": "Apply",
+    "scans_label": "Scans",
+    "scans_over_period": "Scans over this period",
+    "lifetime_scans": "Lifetime scans",
+    "daily_scans_chart": "Scans per day",
+    "countries_chart": "Countries",
+    "operating_systems_chart": "Operating systems",
+    "browsers_chart": "Browsers",
+    "device_types_chart": "Device types",
+    "no_chart_data": "No data for the selected range"
   },
   "account": {
     "email": "Email Address",

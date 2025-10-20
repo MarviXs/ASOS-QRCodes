@@ -47,31 +47,165 @@
         </template>
       </q-select>
     </template>
-    <q-table
-      v-model:pagination="pagination"
-      :rows="scanRecords"
-      :columns="columns"
-      :loading="loading"
-      flat
-      binary-state-sort
-      :rows-per-page-options="[10, 20, 50]"
-      class="shadow"
-      :no-data-label="t('table.no_data_label')"
-      :loading-label="t('table.loading_label')"
-      :rows-per-page-label="t('table.rows_per_page_label')"
-      @request="(requestProp) => fetchScanRecords(requestProp.pagination)"
-    >
-      <template #no-data="{ message }">
-        <div class="full-width column flex-center q-pa-lg nothing-found-text">
-          <q-icon :name="mdiChartLine" class="q-mb-md" size="50px"></q-icon>
-          {{ message }}
+
+    <div class="analytics-content">
+      <div class="row q-col-gutter-md">
+        <div class="col-12 col-md-6">
+          <q-card class="shadow metric-card">
+            <q-card-section class="metric-card__section">
+              <div class="metric-card__label text-caption text-uppercase text-secondary text-weight-medium">
+                {{ t('analytics.scans_over_period') }}
+              </div>
+              <div class="metric-card__value text-h4 text-primary text-weight-bold">
+                <template v-if="!analyticsLoading">{{ formattedPeriodScans }}</template>
+                <q-skeleton v-else type="text" width="70px" />
+              </div>
+            </q-card-section>
+          </q-card>
         </div>
-      </template>
-    </q-table>
+        <div class="col-12 col-md-6">
+          <q-card class="shadow metric-card">
+            <q-card-section class="metric-card__section">
+              <div class="metric-card__label text-caption text-uppercase text-secondary text-weight-medium">
+                {{ t('analytics.lifetime_scans') }}
+              </div>
+              <div class="metric-card__value text-h4 text-primary text-weight-bold">
+                <template v-if="!analyticsLoading">{{ formattedLifetimeScans }}</template>
+                <q-skeleton v-else type="text" width="70px" />
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
+      </div>
+
+      <q-card class="shadow chart-card">
+        <q-card-section>
+          <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+            {{ t('analytics.daily_scans_chart') }}
+          </div>
+          <div class="chart-container">
+            <template v-if="hasDailyData">
+              <apexchart type="line" height="320" :series="dailyLineSeries" :options="dailyLineOptions" />
+            </template>
+            <div v-else class="chart-empty text-secondary text-weight-medium">
+              {{ t('analytics.no_chart_data') }}
+            </div>
+          </div>
+        </q-card-section>
+        <q-inner-loading :showing="analyticsLoading">
+          <q-spinner color="primary" />
+        </q-inner-loading>
+      </q-card>
+
+      <div class="row q-col-gutter-md">
+        <div class="col-12 col-md-4">
+          <q-card class="shadow chart-card">
+            <q-card-section>
+              <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+                {{ t('analytics.operating_systems_chart') }}
+              </div>
+              <div class="chart-container">
+                <template v-if="hasOperatingSystemData">
+                  <apexchart type="donut" height="320" :series="operatingSystemSeries" :options="operatingSystemOptions" />
+                </template>
+                <div v-else class="chart-empty text-secondary text-weight-medium">
+                  {{ t('analytics.no_chart_data') }}
+                </div>
+              </div>
+            </q-card-section>
+            <q-inner-loading :showing="analyticsLoading">
+              <q-spinner color="primary" />
+            </q-inner-loading>
+          </q-card>
+        </div>
+        <div class="col-12 col-md-4">
+          <q-card class="shadow chart-card">
+            <q-card-section>
+              <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+                {{ t('analytics.browsers_chart') }}
+              </div>
+              <div class="chart-container">
+                <template v-if="hasBrowserData">
+                  <apexchart type="donut" height="320" :series="browserSeries" :options="browserOptions" />
+                </template>
+                <div v-else class="chart-empty text-secondary text-weight-medium">
+                  {{ t('analytics.no_chart_data') }}
+                </div>
+              </div>
+            </q-card-section>
+            <q-inner-loading :showing="analyticsLoading">
+              <q-spinner color="primary" />
+            </q-inner-loading>
+          </q-card>
+        </div>
+        <div class="col-12 col-md-4">
+          <q-card class="shadow chart-card">
+            <q-card-section>
+              <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+                {{ t('analytics.device_types_chart') }}
+              </div>
+              <div class="chart-container">
+                <template v-if="hasDeviceTypeData">
+                  <apexchart type="donut" height="320" :series="deviceTypeSeries" :options="deviceTypeOptions" />
+                </template>
+                <div v-else class="chart-empty text-secondary text-weight-medium">
+                  {{ t('analytics.no_chart_data') }}
+                </div>
+              </div>
+            </q-card-section>
+            <q-inner-loading :showing="analyticsLoading">
+              <q-spinner color="primary" />
+            </q-inner-loading>
+          </q-card>
+        </div>
+      </div>
+
+      <q-card class="shadow chart-card">
+        <q-card-section>
+          <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+            {{ t('analytics.countries_chart') }}
+          </div>
+          <div class="chart-container">
+            <template v-if="hasCountryData">
+              <apexchart type="bar" height="320" :series="countriesChartSeries" :options="countriesChartOptions" />
+            </template>
+            <div v-else class="chart-empty text-secondary text-weight-medium">
+              {{ t('analytics.no_chart_data') }}
+            </div>
+          </div>
+        </q-card-section>
+        <q-inner-loading :showing="analyticsLoading">
+          <q-spinner color="primary" />
+        </q-inner-loading>
+      </q-card>
+
+      <q-table
+        v-model:pagination="pagination"
+        :rows="scanRecords"
+        :columns="columns"
+        :loading="loading"
+        flat
+        binary-state-sort
+        :rows-per-page-options="[10, 20, 50]"
+        class="shadow analytics-table"
+        :no-data-label="t('table.no_data_label')"
+        :loading-label="t('table.loading_label')"
+        :rows-per-page-label="t('table.rows_per_page_label')"
+        @request="(requestProp) => fetchScanRecords(requestProp.pagination)"
+      >
+        <template #no-data="{ message }">
+          <div class="full-width column flex-center q-pa-lg nothing-found-text">
+            <q-icon :name="mdiChartLine" class="q-mb-md" size="50px"></q-icon>
+            {{ message }}
+          </div>
+        </template>
+      </q-table>
+    </div>
   </PageLayout>
 </template>
 
 <script setup lang="ts">
+import type { ApexOptions } from 'apexcharts';
 import { computed, nextTick, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
@@ -81,6 +215,7 @@ import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { handleError } from '@/utils/error-handler';
 import QRCodeService from '@/api/services/QRCodeService';
 import ScanRecordService, {
+  type ScanAnalyticsResponse,
   type ScanRecordsQueryParams,
   type ScanRecordsResponse,
 } from '@/api/services/ScanRecordService';
@@ -115,6 +250,247 @@ const pagination = ref<PaginationClient>({
 const loading = ref(false);
 const scanRecordsPaginated = ref<ScanRecordsResponse>();
 const scanRecords = computed(() => scanRecordsPaginated.value?.items ?? []);
+const analyticsLoading = ref(false);
+const scanAnalytics = ref<ScanAnalyticsResponse | null>(null);
+
+const numberFormatter = computed(() => new Intl.NumberFormat(locale.value || undefined));
+const formattedPeriodScans = computed(() =>
+  numberFormatter.value.format(scanAnalytics.value?.totalScansInPeriod ?? 0),
+);
+const formattedLifetimeScans = computed(() =>
+  numberFormatter.value.format(scanAnalytics.value?.lifetimeScans ?? 0),
+);
+const scansLabel = computed(() => t('analytics.scans_label'));
+type CategoryCount = { name: string; count: number };
+
+const sortedDailyScans = computed(() => {
+  const items = scanAnalytics.value?.dailyScans ?? [];
+  return [...items].sort((left, right) => new Date(left.date).getTime() - new Date(right.date).getTime());
+});
+
+const dailyLineSeries = computed(() => {
+  const label = scansLabel.value;
+  const data = sortedDailyScans.value.map((item) => ({
+    x: new Date(item.date).getTime(),
+    y: item.count,
+  }));
+  return [
+    {
+      name: label,
+      data,
+    },
+  ];
+});
+
+const hasDailyData = computed(() => sortedDailyScans.value.length > 0);
+
+const dailyLineOptions = computed((): ApexOptions => {
+  const currentLocale = locale.value || undefined;
+  return {
+    chart: {
+      type: 'line',
+      toolbar: { show: false },
+      animations: { enabled: false },
+    },
+    stroke: {
+      curve: 'smooth',
+      width: 3,
+    },
+    markers: {
+      size: 4,
+      strokeWidth: 0,
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: {
+        datetimeUTC: false,
+      },
+    },
+    yaxis: {
+      min: 0,
+      forceNiceScale: true,
+      labels: {
+        formatter(value: number) {
+          const numeric = Number.isFinite(value) ? value : 0;
+          return numberFormatter.value.format(Math.max(0, numeric));
+        },
+      },
+    },
+    tooltip: {
+      shared: true,
+      x: {
+        formatter(value: number) {
+          return new Date(value).toLocaleDateString(currentLocale, {
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+          });
+        },
+      },
+      y: {
+        formatter(value: number) {
+          const numeric = Number.isFinite(value) ? value : 0;
+          return numberFormatter.value.format(Math.max(0, numeric));
+        },
+      },
+    },
+    grid: {
+      strokeDashArray: 4,
+    },
+  };
+});
+
+function sortCategoryCounts(items: CategoryCount[]): CategoryCount[] {
+  return [...items].sort((left, right) => right.count - left.count);
+}
+
+const operatingSystemData = computed(() => sortCategoryCounts(scanAnalytics.value?.operatingSystems ?? []));
+const operatingSystemLabels = computed(() => operatingSystemData.value.map((item) => item.name));
+const operatingSystemSeries = computed(() => operatingSystemData.value.map((item) => item.count));
+const hasOperatingSystemData = computed(() => operatingSystemSeries.value.length > 0);
+
+const browserData = computed(() => sortCategoryCounts(scanAnalytics.value?.browsers ?? []));
+const browserLabels = computed(() => browserData.value.map((item) => item.name));
+const browserSeries = computed(() => browserData.value.map((item) => item.count));
+const hasBrowserData = computed(() => browserSeries.value.length > 0);
+
+const deviceTypeData = computed(() => sortCategoryCounts(scanAnalytics.value?.deviceTypes ?? []));
+const deviceTypeLabels = computed(() => deviceTypeData.value.map((item) => item.name));
+const deviceTypeSeries = computed(() => deviceTypeData.value.map((item) => item.count));
+const hasDeviceTypeData = computed(() => deviceTypeSeries.value.length > 0);
+
+const countriesData = computed(() => sortCategoryCounts(scanAnalytics.value?.countries ?? []));
+const countryLabels = computed(() => countriesData.value.map((item) => item.name));
+const countriesChartSeries = computed(() => [
+  {
+    name: scansLabel.value,
+    data: countriesData.value.map((item) => item.count),
+  },
+]);
+const hasCountryData = computed(() => countriesData.value.length > 0);
+
+const operatingSystemOptions = computed((): ApexOptions => createDonutOptions(operatingSystemLabels.value));
+const browserOptions = computed((): ApexOptions => createDonutOptions(browserLabels.value));
+const deviceTypeOptions = computed((): ApexOptions => createDonutOptions(deviceTypeLabels.value));
+
+const countriesChartOptions = computed((): ApexOptions => ({
+  chart: {
+    type: 'bar',
+    toolbar: { show: false },
+    animations: { enabled: false },
+  },
+  plotOptions: {
+    bar: {
+      columnWidth: '45%',
+      borderRadius: 6,
+    },
+  },
+  dataLabels: {
+    enabled: false,
+  },
+  xaxis: {
+    categories: countryLabels.value,
+    labels: {
+      rotateAlways: true,
+      rotate: -35,
+      trim: true,
+    },
+  },
+  yaxis: {
+    min: 0,
+    forceNiceScale: true,
+    labels: {
+      formatter(value: number) {
+        const numeric = Number.isFinite(value) ? value : 0;
+        return numberFormatter.value.format(Math.max(0, numeric));
+      },
+    },
+  },
+  tooltip: {
+    y: {
+      formatter(value: number) {
+        const numeric = Number.isFinite(value) ? value : 0;
+        return numberFormatter.value.format(Math.max(0, numeric));
+      },
+    },
+  },
+  grid: {
+    strokeDashArray: 4,
+  },
+  responsive: [
+    {
+      breakpoint: 1024,
+      options: {
+        plotOptions: {
+          bar: {
+            columnWidth: '55%',
+          },
+        },
+      },
+    },
+    {
+      breakpoint: 600,
+      options: {
+        chart: {
+          height: 300,
+        },
+        xaxis: {
+          labels: {
+            rotate: -45,
+          },
+        },
+      },
+    },
+  ],
+}));
+
+function createDonutOptions(labels: string[]): ApexOptions {
+  const formatter = numberFormatter.value;
+  return {
+    chart: {
+      type: 'donut',
+    },
+    labels,
+    legend: {
+      position: 'bottom',
+    },
+    dataLabels: {
+      enabled: false,
+    },
+    tooltip: {
+      y: {
+        formatter(value: number) {
+          const numeric = Number.isFinite(value) ? value : 0;
+          return formatter.format(Math.max(0, numeric));
+        },
+      },
+    },
+    stroke: {
+      width: 0,
+    },
+    responsive: [
+      {
+        breakpoint: 1024,
+        options: {
+          chart: {
+            height: 300,
+          },
+        },
+      },
+      {
+        breakpoint: 600,
+        options: {
+          chart: {
+            height: 260,
+          },
+        },
+      },
+    ],
+  };
+}
 
 const dateSelectRef = ref();
 const dateRanges = ref<DateRangeOption[]>([]);
@@ -224,6 +600,29 @@ async function fetchScanRecords(paginationTable: PaginationTable) {
   }
 }
 
+async function fetchScanAnalytics() {
+  if (!qrCodeId.value) {
+    return;
+  }
+
+  const query = {
+    QRCodeId: qrCodeId.value,
+    StartDate: dateRangeIso.value.start,
+    EndDate: dateRangeIso.value.end,
+  };
+
+  analyticsLoading.value = true;
+  const { data, error } = await ScanRecordService.getScanAnalytics(query);
+  analyticsLoading.value = false;
+
+  if (error) {
+    handleError(error, 'Failed to load analytics');
+    return;
+  }
+
+  scanAnalytics.value = data ?? null;
+}
+
 function createRangeFromPreset(days: number): DateRange {
   const end = endOfDay(new Date());
   const start = startOfDay(new Date(end));
@@ -276,6 +675,7 @@ function refreshWithRange(newRange: DateRange, options?: { fetch?: boolean; rese
       rowsPerPage: pagination.value.rowsPerPage,
     };
     fetchScanRecords(paginationTable);
+    fetchScanAnalytics();
   }
 }
 
@@ -415,6 +815,7 @@ watch(
   (newId) => {
     if (typeof newId === 'string') {
       qrCodeId.value = newId;
+      scanAnalytics.value = null;
       activePresetKey.value = 'last30';
       refreshPresetRanges();
       const defaultPreset = dateRanges.value.find((preset) => preset.key === 'last30');
@@ -429,3 +830,50 @@ watch(
   { immediate: true },
 );
 </script>
+
+<style scoped lang="scss">
+.analytics-content {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.metric-card {
+  height: 100%;
+}
+
+.metric-card__section {
+  min-height: 120px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.chart-card {
+  position: relative;
+}
+
+.chart-container {
+  width: 100%;
+  min-height: 240px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.chart-empty {
+  width: 100%;
+  padding: 1.5rem 0;
+}
+
+.analytics-table {
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .chart-container {
+    min-height: 200px;
+  }
+}
+</style>
