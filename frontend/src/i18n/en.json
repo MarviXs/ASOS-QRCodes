@@ -6,7 +6,8 @@
     "edit": "Edit",
     "delete": "Delete",
     "cancel": "Cancel",
-    "url": "URL"
+    "url": "URL",
+    "analytics": "Analytics"
   },
   "table": {
     "no_data_label": "No data available",
@@ -42,6 +43,13 @@
     "toasts": {
       "delete_success": "QR code deleted successfully."
     }
+  },
+  "analytics": {
+    "title": "QR Code Analytics",
+    "browser": "Browser",
+    "operating_system": "Operating System",
+    "device_type": "Device Type",
+    "country": "Country"
   },
   "account": {
     "email": "Email Address",

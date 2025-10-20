@@ -71,6 +71,11 @@
 
         <template #body-cell-actions="props">
           <q-td auto-width :props="props">
+            <q-btn :icon="mdiChartLine" color="grey-color" flat round :to="`/qr-codes/${props.row.id}/analytics`">
+              <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+                {{ t('global.analytics') }}
+              </q-tooltip>
+            </q-btn>
             <q-btn :icon="mdiPencil" color="grey-color" flat round :to="`/qr-codes/${props.row.id}/edit`">
               <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
                 {{ t('global.edit') }}
@@ -91,7 +96,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { mdiCodeTags, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiChartLine, mdiCodeTags, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
