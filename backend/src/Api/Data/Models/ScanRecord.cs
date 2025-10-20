@@ -8,6 +8,6 @@ public class ScanRecord : BaseModel
     public QRCode? QRCode { get; set; } = null!;
     public string BrowserInfo { get; set; } = string.Empty;
     public string OperatingSystem { get; set; } = string.Empty;
-    public string DeviceType { get; set; } = string.Empty;
+    public DeviceType DeviceType { get; set; } = DeviceType.Other;
     public string Country { get; set; } = string.Empty;
 }

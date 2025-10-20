@@ -1,7 +1,10 @@
 using System.Security.Claims;
 using Carter;
+using DeviceDetectorNET;
+using DeviceDetectorNET.Parser;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
+using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.QRCodes.Extensions;
@@ -61,16 +64,40 @@ public static class ScanQRCode
                 return Result.Fail(new NotFoundError());
             }
 
-            // TODO: Record scan event (with IP address, user agent, timestamp, etc.)
+            var headers = request.Context.Request.Headers.ToDictionary(a => a.Key, a => a.Value.ToArray().FirstOrDefault());
+            var clientHints = ClientHints.Factory(headers);
+            var dd = new DeviceDetector(request.Context.Request.Headers["User-Agent"], clientHints);
+            dd.SkipBotDetection();
+            dd.Parse();
+
+            var clientInfo = dd.GetClient();
+            var osInfo = OperatingSystemParser.GetOsFamily(dd.GetOs().Match?.Name ?? "Unknown");
+            var browserName = clientInfo.Match?.Name ?? "Unknown";
+
+            var deviceType = DeviceType.Other;
+            if (dd.IsDesktop())
+            {
+                deviceType = DeviceType.Desktop;
+            }
+            else if (dd.IsTablet())
+            {
+                deviceType = DeviceType.Tablet;
+            }
+            else if (dd.IsMobile())
+            {
+                deviceType = DeviceType.Mobile;
+            }
 
             var scanRecord = new ScanRecord
             {
                 QRCodeId = qrCode.Id,
-                BrowserInfo = request.Context.Request.Headers["User-Agent"].ToString().GetBrowserInfo(),
-                OperatingSystem = request.Context.Request.Headers["User-Agent"].ToString().GetOperatingSystem(),
-                DeviceType = request.Context.Request.Headers["User-Agent"].ToString().GetDeviceType(),
-                Country = request.Context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown"
+                Country = request.Context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown",
+                OperatingSystem = osInfo.ToString(),
+                BrowserInfo = browserName,
+                DeviceType = deviceType,
             };
+            context.ScanRecords.Add(scanRecord);
+            await context.SaveChangesAsync(cancellationToken);
 
             var response = new Response(qrCode.RedirectUrl);
 
