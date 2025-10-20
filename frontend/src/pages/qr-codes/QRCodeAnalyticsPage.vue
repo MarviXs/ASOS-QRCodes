@@ -72,7 +72,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed, ref, watch } from 'vue';
+import { computed, nextTick, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
 import { mdiCalendarRange, mdiChartLine } from '@quasar/extras/mdi-v7';
@@ -305,6 +305,39 @@ function applySelectionRange(selection: DatePickerRange, options?: { fetch?: boo
   refreshWithRange(newRange, options);
 }
 
+function cloneRange(range: DatePickerRange): DatePickerRange {
+  return { from: range.from, to: range.to };
+}
+
+function scheduleSuppressionReset() {
+  nextTick(() => {
+    suppressNextUpdate = false;
+  });
+}
+
+function setSelectedRange(range: DatePickerRange, options?: { suppressIfChanged?: boolean }) {
+  if (!range) {
+    return;
+  }
+  const suppress = options?.suppressIfChanged ?? false;
+  const current = dateRangeSelected.value;
+  const sameReference = current === range;
+  const sameValue = current ? rangesEqual(current, range) : false;
+
+  if (sameReference) {
+    return;
+  }
+
+  if (suppress) {
+    suppressNextUpdate = !sameValue;
+    if (suppressNextUpdate) {
+      scheduleSuppressionReset();
+    }
+  }
+
+  dateRangeSelected.value = range;
+}
+
 function refreshPresetRanges() {
   const presets = presetDefinitions.map<DateRangeOption>((preset) => ({
     key: preset.key,
@@ -316,10 +349,13 @@ function refreshPresetRanges() {
   if (activePresetKey.value !== 'custom') {
     const activePreset = presets.find((preset) => preset.key === activePresetKey.value);
     if (activePreset) {
-      suppressNextUpdate = true;
-      dateRangeSelected.value = activePreset.dateRange;
+      setSelectedRange(activePreset.dateRange, { suppressIfChanged: true });
     }
   }
+}
+
+function rangesEqual(left: DatePickerRange, right: DatePickerRange): boolean {
+  return left.from === right.from && left.to === right.to;
 }
 
 function onDateRangeChange(selection: DatePickerRange | null) {
@@ -330,14 +366,18 @@ function onDateRangeChange(selection: DatePickerRange | null) {
   if (!selection?.from || !selection?.to) {
     return;
   }
-  const presetMatch = dateRanges.value.find((option) => option.dateRange === selection);
+  const presetMatch = dateRanges.value.find((option) =>
+    rangesEqual(option.dateRange, selection),
+  );
   activePresetKey.value = presetMatch?.key ?? 'custom';
-  applySelectionRange(selection);
+  const effectiveSelection = presetMatch?.dateRange ?? selection;
+  setSelectedRange(effectiveSelection);
+  applySelectionRange(effectiveSelection);
 }
 
 function prepareCustomRange() {
   customRangeTemp.value = dateRangeSelected.value
-    ? { ...dateRangeSelected.value }
+    ? cloneRange(dateRangeSelected.value)
     : createPickerRange(createRangeFromPreset(30));
 }
 
@@ -346,8 +386,7 @@ function applyCustomRange() {
     return;
   }
   const normalized = normalizePickerRange(customRangeTemp.value);
-  suppressNextUpdate = true;
-  dateRangeSelected.value = normalized;
+  setSelectedRange(normalized, { suppressIfChanged: true });
   activePresetKey.value = 'custom';
   applySelectionRange(normalized);
   dateSelectRef.value?.hidePopup();
@@ -359,11 +398,13 @@ applySelectionRange(dateRangeSelected.value, { fetch: false, resetPage: false })
 watch(
   () => locale.value,
   () => {
-    const previousSelection = activePresetKey.value === 'custom' ? { ...dateRangeSelected.value } : undefined;
+    const previousSelection =
+      activePresetKey.value === 'custom' && dateRangeSelected.value
+        ? cloneRange(dateRangeSelected.value)
+        : undefined;
     refreshPresetRanges();
     if (activePresetKey.value === 'custom' && previousSelection) {
-      suppressNextUpdate = true;
-      dateRangeSelected.value = previousSelection;
+      setSelectedRange(previousSelection, { suppressIfChanged: true });
     }
     applySelectionRange(dateRangeSelected.value, { fetch: false, resetPage: false });
   },
@@ -379,8 +420,7 @@ watch(
       const defaultPreset = dateRanges.value.find((preset) => preset.key === 'last30');
       const selection = defaultPreset?.dateRange ?? dateRangeSelected.value;
       if (defaultPreset) {
-        suppressNextUpdate = true;
-        dateRangeSelected.value = defaultPreset.dateRange;
+        setSelectedRange(defaultPreset.dateRange, { suppressIfChanged: true });
       }
       applySelectionRange(selection, { fetch: true });
       fetchQRCodeName(newId);
