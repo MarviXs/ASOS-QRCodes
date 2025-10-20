@@ -78,26 +78,48 @@
         </div>
       </div>
 
-      <q-card class="shadow chart-card">
-        <q-card-section>
-          <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
-            {{ t('analytics.daily_scans_chart') }}
-          </div>
-          <div class="chart-container">
-            <template v-if="hasDailyData">
-              <apexchart type="line" height="320" :series="dailyLineSeries" :options="dailyLineOptions" />
-            </template>
-            <div v-else class="chart-empty text-secondary text-weight-medium">
-              {{ t('analytics.no_chart_data') }}
-            </div>
-          </div>
-        </q-card-section>
-        <q-inner-loading :showing="analyticsLoading">
-          <q-spinner color="primary" />
-        </q-inner-loading>
-      </q-card>
+      <div class="row q-col-gutter-lg">
+        <div class="col-12 col-lg-8">
+          <q-card class="shadow chart-card">
+            <q-card-section>
+              <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+                {{ t('analytics.daily_scans_chart') }}
+              </div>
+              <div class="chart-container">
+                <template v-if="hasDailyData">
+                  <apexchart type="line" height="320" :series="dailyLineSeries" :options="dailyLineOptions" />
+                </template>
+                <div v-else class="chart-empty text-secondary text-weight-medium">
+                  {{ t('analytics.no_chart_data') }}
+                </div>
+              </div>
+            </q-card-section>
+            <q-inner-loading :showing="analyticsLoading">
+              <q-spinner color="primary" />
+            </q-inner-loading>
+          </q-card>
+        </div>
+        <div class="col-12 col-lg-4">
+          <q-card class="shadow chart-card">
+            <q-card-section>
+              <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+                {{ t('analytics.countries_chart') }}
+              </div>
+              <div class="chart-container">
+                <template v-if="hasCountryData">
+                  <apexchart type="bar" height="320" :series="countriesChartSeries" :options="countriesChartOptions" />
+                </template>
+                <div v-else class="chart-empty text-secondary text-weight-medium">
+                  {{ t('analytics.no_chart_data') }}
+                </div>
+              </div>
+            </q-card-section>
+            <q-inner-loading :showing="analyticsLoading">
+              <q-spinner color="primary" />
+            </q-inner-loading>
+          </q-card>
+        </div>
 
-      <div class="row q-col-gutter-md">
         <div class="col-12 col-md-4">
           <q-card class="shadow chart-card">
             <q-card-section>
@@ -106,7 +128,12 @@
               </div>
               <div class="chart-container">
                 <template v-if="hasOperatingSystemData">
-                  <apexchart type="donut" height="320" :series="operatingSystemSeries" :options="operatingSystemOptions" />
+                  <apexchart
+                    type="donut"
+                    height="320"
+                    :series="operatingSystemSeries"
+                    :options="operatingSystemOptions"
+                  />
                 </template>
                 <div v-else class="chart-empty text-secondary text-weight-medium">
                   {{ t('analytics.no_chart_data') }}
@@ -159,25 +186,6 @@
           </q-card>
         </div>
       </div>
-
-      <q-card class="shadow chart-card">
-        <q-card-section>
-          <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
-            {{ t('analytics.countries_chart') }}
-          </div>
-          <div class="chart-container">
-            <template v-if="hasCountryData">
-              <apexchart type="bar" height="320" :series="countriesChartSeries" :options="countriesChartOptions" />
-            </template>
-            <div v-else class="chart-empty text-secondary text-weight-medium">
-              {{ t('analytics.no_chart_data') }}
-            </div>
-          </div>
-        </q-card-section>
-        <q-inner-loading :showing="analyticsLoading">
-          <q-spinner color="primary" />
-        </q-inner-loading>
-      </q-card>
 
       <q-table
         v-model:pagination="pagination"
@@ -254,12 +262,8 @@ const analyticsLoading = ref(false);
 const scanAnalytics = ref<ScanAnalyticsResponse | null>(null);
 
 const numberFormatter = computed(() => new Intl.NumberFormat(locale.value || undefined));
-const formattedPeriodScans = computed(() =>
-  numberFormatter.value.format(scanAnalytics.value?.totalScansInPeriod ?? 0),
-);
-const formattedLifetimeScans = computed(() =>
-  numberFormatter.value.format(scanAnalytics.value?.lifetimeScans ?? 0),
-);
+const formattedPeriodScans = computed(() => numberFormatter.value.format(scanAnalytics.value?.totalScansInPeriod ?? 0));
+const formattedLifetimeScans = computed(() => numberFormatter.value.format(scanAnalytics.value?.lifetimeScans ?? 0));
 const scansLabel = computed(() => t('analytics.scans_label'));
 type CategoryCount = { name: string; count: number };
 
@@ -376,76 +380,78 @@ const operatingSystemOptions = computed((): ApexOptions => createDonutOptions(op
 const browserOptions = computed((): ApexOptions => createDonutOptions(browserLabels.value));
 const deviceTypeOptions = computed((): ApexOptions => createDonutOptions(deviceTypeLabels.value));
 
-const countriesChartOptions = computed((): ApexOptions => ({
-  chart: {
-    type: 'bar',
-    toolbar: { show: false },
-    animations: { enabled: false },
-  },
-  plotOptions: {
-    bar: {
-      columnWidth: '45%',
-      borderRadius: 6,
+const countriesChartOptions = computed(
+  (): ApexOptions => ({
+    chart: {
+      type: 'bar',
+      toolbar: { show: false },
+      animations: { enabled: false },
     },
-  },
-  dataLabels: {
-    enabled: false,
-  },
-  xaxis: {
-    categories: countryLabels.value,
-    labels: {
-      rotateAlways: true,
-      rotate: -35,
-      trim: true,
-    },
-  },
-  yaxis: {
-    min: 0,
-    forceNiceScale: true,
-    labels: {
-      formatter(value: number) {
-        const numeric = Number.isFinite(value) ? value : 0;
-        return numberFormatter.value.format(Math.max(0, numeric));
+    plotOptions: {
+      bar: {
+        columnWidth: '45%',
+        borderRadius: 6,
       },
     },
-  },
-  tooltip: {
-    y: {
-      formatter(value: number) {
-        const numeric = Number.isFinite(value) ? value : 0;
-        return numberFormatter.value.format(Math.max(0, numeric));
+    dataLabels: {
+      enabled: false,
+    },
+    xaxis: {
+      categories: countryLabels.value,
+      labels: {
+        rotateAlways: true,
+        rotate: -35,
+        trim: true,
       },
     },
-  },
-  grid: {
-    strokeDashArray: 4,
-  },
-  responsive: [
-    {
-      breakpoint: 1024,
-      options: {
-        plotOptions: {
-          bar: {
-            columnWidth: '55%',
+    yaxis: {
+      min: 0,
+      forceNiceScale: true,
+      labels: {
+        formatter(value: number) {
+          const numeric = Number.isFinite(value) ? value : 0;
+          return numberFormatter.value.format(Math.max(0, numeric));
+        },
+      },
+    },
+    tooltip: {
+      y: {
+        formatter(value: number) {
+          const numeric = Number.isFinite(value) ? value : 0;
+          return numberFormatter.value.format(Math.max(0, numeric));
+        },
+      },
+    },
+    grid: {
+      strokeDashArray: 4,
+    },
+    responsive: [
+      {
+        breakpoint: 1024,
+        options: {
+          plotOptions: {
+            bar: {
+              columnWidth: '55%',
+            },
           },
         },
       },
-    },
-    {
-      breakpoint: 600,
-      options: {
-        chart: {
-          height: 300,
-        },
-        xaxis: {
-          labels: {
-            rotate: -45,
+      {
+        breakpoint: 600,
+        options: {
+          chart: {
+            height: 300,
+          },
+          xaxis: {
+            labels: {
+              rotate: -45,
+            },
           },
         },
       },
-    },
-  ],
-}));
+    ],
+  }),
+);
 
 function createDonutOptions(labels: string[]): ApexOptions {
   const formatter = numberFormatter.value;
@@ -766,9 +772,7 @@ function onDateRangeChange(selection: DatePickerRange | null) {
   if (!selection?.from || !selection?.to) {
     return;
   }
-  const presetMatch = dateRanges.value.find((option) =>
-    rangesEqual(option.dateRange, selection),
-  );
+  const presetMatch = dateRanges.value.find((option) => rangesEqual(option.dateRange, selection));
   activePresetKey.value = presetMatch?.key ?? 'custom';
   const effectiveSelection = presetMatch?.dateRange ?? selection;
   setSelectedRange(effectiveSelection);
@@ -799,9 +803,7 @@ watch(
   () => locale.value,
   () => {
     const previousSelection =
-      activePresetKey.value === 'custom' && dateRangeSelected.value
-        ? cloneRange(dateRangeSelected.value)
-        : undefined;
+      activePresetKey.value === 'custom' && dateRangeSelected.value ? cloneRange(dateRangeSelected.value) : undefined;
     refreshPresetRanges();
     if (activePresetKey.value === 'custom' && previousSelection) {
       setSelectedRange(previousSelection, { suppressIfChanged: true });
