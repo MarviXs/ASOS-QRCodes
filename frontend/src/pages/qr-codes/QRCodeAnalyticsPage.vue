@@ -1,5 +1,52 @@
 <template>
   <PageLayout :breadcrumbs="breadcrumbs">
+    <template #actions>
+      <q-select
+        ref="dateSelectRef"
+        class="shadow date-picker"
+        v-model="dateRangeSelected"
+        :options="dateRanges"
+        :label="t('analytics.date_range')"
+        option-value="dateRange"
+        option-label="name"
+        filled
+        dense
+        bg-color="white"
+        emit-value
+        hide-bottom-space
+        map-options
+        @update:model-value="onDateRangeChange"
+      >
+        <template #prepend>
+          <q-icon :name="mdiCalendarRange" />
+        </template>
+        <template #after-options>
+          <q-item clickable>
+            <q-item-section>
+              <q-item-label>{{ t('analytics.custom') }}</q-item-label>
+            </q-item-section>
+            <q-popup-proxy transition-show="scale" transition-hide="scale" @before-show="prepareCustomRange">
+              <q-date v-model="customRangeTemp" range mask="YYYY/MM/DD" color="primary">
+                <div class="row items-center justify-end q-gutter-sm q-pa-sm">
+                  <q-btn
+                    color="primary"
+                    flat
+                    dense
+                    :label="t('analytics.apply_range')"
+                    v-close-popup
+                    @click="applyCustomRange"
+                  />
+                </div>
+              </q-date>
+            </q-popup-proxy>
+          </q-item>
+        </template>
+        <template #selected-item="scope">
+          <template v-if="scope.opt?.name">{{ scope.opt.name }}</template>
+          <template v-else-if="dateRangeSelected"> {{ dateRangeSelected.from }} - {{ dateRangeSelected.to }} </template>
+        </template>
+      </q-select>
+    </template>
     <q-table
       v-model:pagination="pagination"
       :rows="scanRecords"
@@ -28,7 +75,7 @@
 import { computed, ref, watch } from 'vue';
 import { useRoute } from 'vue-router';
 import { useI18n } from 'vue-i18n';
-import { mdiChartLine } from '@quasar/extras/mdi-v7';
+import { mdiCalendarRange, mdiChartLine } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import type { PaginationClient, PaginationTable } from '@/models/Pagination';
 import { handleError } from '@/utils/error-handler';
@@ -38,6 +85,18 @@ import ScanRecordService, {
   type ScanRecordsResponse,
 } from '@/api/services/ScanRecordService';
 import type { QTableProps } from 'quasar';
+
+type PresetKey = 'last7' | 'last14' | 'last30' | 'last90';
+type DatePickerRange = { from: string; to: string };
+interface DateRangeOption {
+  key: PresetKey;
+  name: string;
+  dateRange: DatePickerRange;
+}
+interface DateRange {
+  start: Date;
+  end: Date;
+}
 
 const route = useRoute();
 const { t, locale } = useI18n();
@@ -57,10 +116,29 @@ const loading = ref(false);
 const scanRecordsPaginated = ref<ScanRecordsResponse>();
 const scanRecords = computed(() => scanRecordsPaginated.value?.items ?? []);
 
+const dateSelectRef = ref();
+const dateRanges = ref<DateRangeOption[]>([]);
+const activePresetKey = ref<PresetKey | 'custom'>('last30');
+const dateRangeSelected = ref<DatePickerRange>(createPickerRange(createRangeFromPreset(30)));
+const customRangeTemp = ref<DatePickerRange | null>(null);
+const dateRange = ref<DateRange>(createRangeFromPreset(30));
+let suppressNextUpdate = false;
+const presetDefinitions: Array<{ key: PresetKey; days: number; labelKey: string }> = [
+  { key: 'last7', days: 7, labelKey: 'analytics.last_7_days' },
+  { key: 'last14', days: 14, labelKey: 'analytics.last_14_days' },
+  { key: 'last30', days: 30, labelKey: 'analytics.last_30_days' },
+  { key: 'last90', days: 90, labelKey: 'analytics.last_90_days' },
+];
+
 const breadcrumbs = computed(() => [
   { label: 'QR Codes', to: '/qr-codes' },
   { label: qrCodeName.value || t('analytics.title') },
 ]);
+
+const dateRangeIso = computed(() => ({
+  start: dateRange.value ? dateRange.value.start.toISOString() : undefined,
+  end: dateRange.value ? dateRange.value.end.toISOString() : undefined,
+}));
 
 const columns = computed<QTableProps['columns']>(() => [
   {
@@ -123,6 +201,8 @@ async function fetchScanRecords(paginationTable: PaginationTable) {
     Descending: paginationTable.descending,
     PageNumber: paginationTable.page,
     PageSize: paginationTable.rowsPerPage,
+    StartDate: dateRangeIso.value.start,
+    EndDate: dateRangeIso.value.end,
   };
 
   loading.value = true;
@@ -144,14 +224,166 @@ async function fetchScanRecords(paginationTable: PaginationTable) {
   }
 }
 
+function createRangeFromPreset(days: number): DateRange {
+  const end = endOfDay(new Date());
+  const start = startOfDay(new Date(end));
+  start.setDate(start.getDate() - (days - 1));
+  return { start, end };
+}
+
+function createPickerRange(range: DateRange): DatePickerRange {
+  return {
+    from: formatDateLabel(range.start),
+    to: formatDateLabel(range.end),
+  };
+}
+
+function startOfDay(date: Date): Date {
+  const day = new Date(date);
+  day.setHours(0, 0, 0, 0);
+  return day;
+}
+
+function endOfDay(date: Date): Date {
+  const day = new Date(date);
+  day.setHours(23, 59, 59, 999);
+  return day;
+}
+
+function formatDateLabel(date: Date): string {
+  const year = date.getFullYear();
+  const month = `${date.getMonth() + 1}`.padStart(2, '0');
+  const day = `${date.getDate()}`.padStart(2, '0');
+  return `${year}/${month}/${day}`;
+}
+
+function parsePickerDate(value: string): Date {
+  const [year, month, day] = value.split('/').map(Number);
+  return new Date(year, (month ?? 1) - 1, day ?? 1);
+}
+
+function refreshWithRange(newRange: DateRange, options?: { fetch?: boolean; resetPage?: boolean }) {
+  const { fetch = true, resetPage = true } = options ?? {};
+  dateRange.value = newRange;
+  if (resetPage) {
+    pagination.value.page = 1;
+  }
+  if (fetch) {
+    const paginationTable: PaginationTable = {
+      sortBy: pagination.value.sortBy,
+      descending: pagination.value.descending,
+      page: pagination.value.page,
+      rowsPerPage: pagination.value.rowsPerPage,
+    };
+    fetchScanRecords(paginationTable);
+  }
+}
+
+function selectionToDateRange(selection: DatePickerRange): DateRange {
+  const start = startOfDay(parsePickerDate(selection.from));
+  const end = endOfDay(parsePickerDate(selection.to));
+  return { start, end };
+}
+
+function normalizePickerRange(range: DatePickerRange): DatePickerRange {
+  const startDateRaw = parsePickerDate(range.from);
+  const endDateRaw = parsePickerDate(range.to);
+  const [minDate, maxDate] = startDateRaw <= endDateRaw ? [startDateRaw, endDateRaw] : [endDateRaw, startDateRaw];
+  const normalizedStart = startOfDay(minDate);
+  const normalizedEnd = endOfDay(maxDate);
+  return {
+    from: formatDateLabel(normalizedStart),
+    to: formatDateLabel(normalizedEnd),
+  };
+}
+
+function applySelectionRange(selection: DatePickerRange, options?: { fetch?: boolean; resetPage?: boolean }) {
+  if (!selection?.from || !selection?.to) {
+    return;
+  }
+  const newRange = selectionToDateRange(selection);
+  refreshWithRange(newRange, options);
+}
+
+function refreshPresetRanges() {
+  const presets = presetDefinitions.map<DateRangeOption>((preset) => ({
+    key: preset.key,
+    name: t(preset.labelKey),
+    dateRange: createPickerRange(createRangeFromPreset(preset.days)),
+  }));
+  dateRanges.value = presets;
+
+  if (activePresetKey.value !== 'custom') {
+    const activePreset = presets.find((preset) => preset.key === activePresetKey.value);
+    if (activePreset) {
+      suppressNextUpdate = true;
+      dateRangeSelected.value = activePreset.dateRange;
+    }
+  }
+}
+
+function onDateRangeChange(selection: DatePickerRange | null) {
+  if (suppressNextUpdate) {
+    suppressNextUpdate = false;
+    return;
+  }
+  if (!selection?.from || !selection?.to) {
+    return;
+  }
+  const presetMatch = dateRanges.value.find((option) => option.dateRange === selection);
+  activePresetKey.value = presetMatch?.key ?? 'custom';
+  applySelectionRange(selection);
+}
+
+function prepareCustomRange() {
+  customRangeTemp.value = dateRangeSelected.value
+    ? { ...dateRangeSelected.value }
+    : createPickerRange(createRangeFromPreset(30));
+}
+
+function applyCustomRange() {
+  if (!customRangeTemp.value?.from || !customRangeTemp.value?.to) {
+    return;
+  }
+  const normalized = normalizePickerRange(customRangeTemp.value);
+  suppressNextUpdate = true;
+  dateRangeSelected.value = normalized;
+  activePresetKey.value = 'custom';
+  applySelectionRange(normalized);
+  dateSelectRef.value?.hidePopup();
+}
+
+refreshPresetRanges();
+applySelectionRange(dateRangeSelected.value, { fetch: false, resetPage: false });
+
+watch(
+  () => locale.value,
+  () => {
+    const previousSelection = activePresetKey.value === 'custom' ? { ...dateRangeSelected.value } : undefined;
+    refreshPresetRanges();
+    if (activePresetKey.value === 'custom' && previousSelection) {
+      suppressNextUpdate = true;
+      dateRangeSelected.value = previousSelection;
+    }
+    applySelectionRange(dateRangeSelected.value, { fetch: false, resetPage: false });
+  },
+);
+
 watch(
   () => route.params.id,
   (newId) => {
     if (typeof newId === 'string') {
       qrCodeId.value = newId;
-      pagination.value.page = 1;
+      activePresetKey.value = 'last30';
+      refreshPresetRanges();
+      const defaultPreset = dateRanges.value.find((preset) => preset.key === 'last30');
+      const selection = defaultPreset?.dateRange ?? dateRangeSelected.value;
+      if (defaultPreset) {
+        suppressNextUpdate = true;
+        dateRangeSelected.value = defaultPreset.dateRange;
+      }
+      applySelectionRange(selection, { fetch: true });
       fetchQRCodeName(newId);
-      fetchScanRecords(pagination.value);
     }
   },
   { immediate: true },

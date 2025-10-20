@@ -624,6 +624,8 @@ export interface operations {
         parameters: {
             query?: {
                 QRCodeId?: string;
+                StartDate?: string;
+                EndDate?: string;
                 SortBy?: string;
                 Descending?: boolean;
                 SearchTerm?: string;

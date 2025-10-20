@@ -50,7 +50,15 @@
     "operating_system": "Operating System",
     "device_type": "Device Type",
     "country": "Country",
-    "scan_time": "Scan Time"
+    "scan_time": "Scan Time",
+    "date_range": "Date Range",
+    "last_7_days": "Last 7 Days",
+    "last_14_days": "Last 14 Days",
+    "last_30_days": "Last 30 Days",
+    "last_90_days": "Last 90 Days",
+    "custom": "Custom",
+    "custom_range_title": "Custom Date Range",
+    "apply_range": "Apply"
   },
   "account": {
     "email": "Email Address",

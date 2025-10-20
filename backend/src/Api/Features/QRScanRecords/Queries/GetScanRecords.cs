@@ -22,6 +22,8 @@ public static class GetScanRecords
     public class QueryParameters : SearchParameters
     {
         public Guid? QRCodeId { get; set; }
+        public DateTime? StartDate { get; set; }
+        public DateTime? EndDate { get; set; }
     }
 
     public sealed class Endpoint : ICarterModule
@@ -85,6 +87,15 @@ public static class GetScanRecords
             if (qrCodeParameters.QRCodeId.HasValue)
             {
                 query = query.Where(d => d.QRCodeId == qrCodeParameters.QRCodeId.Value);
+            }
+
+            if (qrCodeParameters.StartDate.HasValue)
+            {
+                query = query.Where(d => d.CreatedAt >= qrCodeParameters.StartDate.Value);
+            }
+            if (qrCodeParameters.EndDate.HasValue)
+            {
+                query = query.Where(d => d.CreatedAt <= qrCodeParameters.EndDate.Value);
             }
 
             query = query.Sort(qrCodeParameters.SortBy ?? nameof(ScanRecord.CreatedAt), qrCodeParameters.Descending);
