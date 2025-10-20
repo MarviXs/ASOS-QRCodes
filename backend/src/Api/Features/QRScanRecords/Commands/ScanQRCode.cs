@@ -3,6 +3,7 @@ using Carter;
 using Fei.Is.Api.Common.Errors;
 using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Models;
+using Fei.Is.Api.Extensions;
 using Fei.Is.Api.Features.QRCodes.Extensions;
 using FluentResults;
 using MediatR;
@@ -19,9 +20,9 @@ public static class ScanQRCode
         {
             app.MapGet(
                     "scan/{shortCode}",
-                    async Task<Results<RedirectHttpResult, NotFound, ForbidHttpResult>> (IMediator mediator, string shortCode) =>
+                    async Task<Results<RedirectHttpResult, NotFound, ForbidHttpResult>> (HttpContext context, IMediator mediator, string shortCode) =>
                     {
-                        var query = new Query(shortCode);
+                        var query = new Query(shortCode, context);
                         var result = await mediator.Send(query);
 
                         if (result.HasError<NotFoundError>())
@@ -47,7 +48,7 @@ public static class ScanQRCode
         }
     }
 
-    public record Query(string ShortCode) : IRequest<Result<Response>>;
+    public record Query(string ShortCode, HttpContext Context) : IRequest<Result<Response>>;
 
     public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
     {
@@ -65,10 +66,10 @@ public static class ScanQRCode
             var scanRecord = new ScanRecord
             {
                 QRCodeId = qrCode.Id,
-                BrowserInfo = "Unknown",
-                OperatingSystem = "Unknown",
-                DeviceType = "Unknown",
-                Country = "Unknown" 
+                BrowserInfo = request.Context.Request.Headers["User-Agent"].ToString().GetBrowserInfo(),
+                OperatingSystem = request.Context.Request.Headers["User-Agent"].ToString().GetOperatingSystem(),
+                DeviceType = request.Context.Request.Headers["User-Agent"].ToString().GetDeviceType(),
+                Country = request.Context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown"
             };
 
             var response = new Response(qrCode.RedirectUrl);
