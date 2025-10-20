@@ -18,8 +18,8 @@ public static class ScanQRCode
         public void AddRoutes(IEndpointRouteBuilder app)
         {
             app.MapGet(
-                    "qr-codes/{shortCode:string}/scan",
-                    async Task<Results<Ok<Response>, NotFound, ForbidHttpResult>> (IMediator mediator, string shortCode) =>
+                    "scan/{shortCode}",
+                    async Task<Results<RedirectHttpResult, NotFound, ForbidHttpResult>> (IMediator mediator, string shortCode) =>
                     {
                         var query = new Query(shortCode);
                         var result = await mediator.Send(query);
@@ -33,7 +33,7 @@ public static class ScanQRCode
                             return TypedResults.Forbid();
                         }
 
-                        return TypedResults.Ok(result.Value);
+                        return TypedResults.Redirect(result.Value.RedirectUrl);
                     }
                 )
                 .WithName(nameof(ScanQRCode))
@@ -41,7 +41,7 @@ public static class ScanQRCode
                 .AllowAnonymous()
                 .WithOpenApi(o =>
                 {
-                    o.Summary = "Get a QR code by short code";
+                    o.Summary = "Redirect to the URL";
                     return o;
                 });
         }
@@ -59,6 +59,8 @@ public static class ScanQRCode
             {
                 return Result.Fail(new NotFoundError());
             }
+
+            // TODO: Record scan event (with IP address, user agent, timestamp, etc.)
 
             var response = new Response(qrCode.RedirectUrl);
 
