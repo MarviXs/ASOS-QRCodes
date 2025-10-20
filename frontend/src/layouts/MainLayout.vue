@@ -47,6 +47,7 @@
           <q-img src="../assets/logo.png" height="3.7rem" fit="contain" no-spinner no-transition />
         </router-link>
         <div class="links">
+          <side-menu-button to="/" :label="t('global.analytics')" :icon="mdiChartLine" />
           <side-menu-button to="/qr-codes" label="QR Codes" :icon="mdiQrcode" />
         </div>
       </div>
@@ -63,7 +64,14 @@ import SideMenuButton from '@/components/core/SideMenuButton.vue';
 import LanguageSelect from '@/components/core/LanguageSelect.vue';
 import { useAuthStore } from '@/stores/auth-store';
 import { useI18n } from 'vue-i18n';
-import { mdiMenu, mdiAccountCircle, mdiLogout, mdiAccountOutline, mdiQrcode } from '@quasar/extras/mdi-v7';
+import {
+  mdiMenu,
+  mdiAccountCircle,
+  mdiLogout,
+  mdiAccountOutline,
+  mdiQrcode,
+  mdiChartLine,
+} from '@quasar/extras/mdi-v7';
 import { toast } from 'vue3-toastify';
 
 const { t } = useI18n();

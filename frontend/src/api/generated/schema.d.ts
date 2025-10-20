@@ -665,8 +665,8 @@ export interface operations {
     };
     GetScanAnalytics: {
         parameters: {
-            query: {
-                QRCodeId: string;
+            query?: {
+                QRCodeId?: string;
                 StartDate?: string;
                 EndDate?: string;
             };

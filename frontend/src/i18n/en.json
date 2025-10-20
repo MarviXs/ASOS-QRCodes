@@ -67,6 +67,7 @@
     "operating_systems_chart": "Operating systems",
     "browsers_chart": "Browsers",
     "device_types_chart": "Device types",
+    "qr_code_name": "QR Code",
     "no_chart_data": "No data for the selected range"
   },
   "account": {

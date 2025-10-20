@@ -71,22 +71,21 @@ public static class GetScanRecords
         {
             var qrCodeParameters = message.Parameters;
 
-            var qrCode = await context
-                .QRCodes.AsNoTracking()
-                .FirstOrDefaultAsync(qrCode => qrCode.Id == qrCodeParameters.QRCodeId, cancellationToken);
-            if (qrCode == null)
-            {
-                return Result.Fail(new NotFoundError());
-            }
-            if (!qrCode.IsOwner(message.User))
-            {
-                return Result.Fail(new ForbiddenError());
-            }
-
-            var query = context.ScanRecords.AsNoTracking();
+            var query = context.ScanRecords.AsNoTracking().Include(sr => sr.QRCode).AsQueryable();
             if (qrCodeParameters.QRCodeId.HasValue)
             {
                 query = query.Where(d => d.QRCodeId == qrCodeParameters.QRCodeId.Value);
+                var qrCode = await context
+                    .QRCodes.AsNoTracking()
+                    .FirstOrDefaultAsync(qrCode => qrCode.Id == qrCodeParameters.QRCodeId, cancellationToken);
+                if (qrCode == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+                if (!qrCode.IsOwner(message.User))
+                {
+                    return Result.Fail(new ForbiddenError());
+                }
             }
 
             if (qrCodeParameters.StartDate.HasValue)
@@ -106,7 +105,7 @@ public static class GetScanRecords
 
             var responseItems = scans.Select(scan => new Response(
                 scan.Id,
-                qrCode.DisplayName,
+                scan.QRCode?.DisplayName ?? "Deleted QR Code",
                 scan.QRCodeId,
                 scan.Country,
                 scan.OperatingSystem,

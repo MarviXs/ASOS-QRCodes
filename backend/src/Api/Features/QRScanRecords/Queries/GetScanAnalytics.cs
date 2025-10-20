@@ -16,7 +16,7 @@ public static class GetScanAnalytics
 {
     public class QueryParameters
     {
-        public Guid QRCodeId { get; set; }
+        public Guid? QRCodeId { get; set; }
         public DateTime? StartDate { get; set; }
         public DateTime? EndDate { get; set; }
     }
@@ -72,19 +72,27 @@ public static class GetScanAnalytics
         {
             var parameters = message.Parameters;
 
-            if (parameters.QRCodeId == Guid.Empty)
+            // Validate QRCodeId if provided (empty GUID is not allowed). When not provided, aggregate across all user's QR codes.
+            if (parameters.QRCodeId.HasValue && parameters.QRCodeId.Value == Guid.Empty)
             {
-                return Result.Fail(new ValidationError(nameof(parameters.QRCodeId), "QRCodeId is required."));
+                return Result.Fail(
+                    new ValidationError(nameof(parameters.QRCodeId), "QRCodeId must be a valid GUID or omitted to aggregate all QR codes.")
+                );
             }
 
-            var qrCode = await context.QRCodes.AsNoTracking().FirstOrDefaultAsync(qr => qr.Id == parameters.QRCodeId, cancellationToken);
-            if (qrCode == null)
+            // If a specific QRCodeId is provided, ensure it exists and belongs to the user.
+            if (parameters.QRCodeId.HasValue)
             {
-                return Result.Fail(new NotFoundError());
-            }
-            if (!qrCode.IsOwner(message.User))
-            {
-                return Result.Fail(new ForbiddenError());
+                var qrCode = await context.QRCodes.AsNoTracking().FirstOrDefaultAsync(qr => qr.Id == parameters.QRCodeId.Value, cancellationToken);
+
+                if (qrCode == null)
+                {
+                    return Result.Fail(new NotFoundError());
+                }
+                if (!qrCode.IsOwner(message.User))
+                {
+                    return Result.Fail(new ForbiddenError());
+                }
             }
 
             var startDate = parameters.StartDate?.Date ?? DateTime.UtcNow.Date.AddDays(-(DefaultRangeDays - 1));
@@ -97,7 +105,20 @@ public static class GetScanAnalytics
 
             var periodEndExclusive = endDate.AddDays(1);
 
-            var baseQuery = context.ScanRecords.AsNoTracking().Where(scan => scan.QRCodeId == parameters.QRCodeId);
+            // Build the base query depending on whether a specific QRCodeId is provided.
+            IQueryable<ScanRecord> baseQuery;
+            if (parameters.QRCodeId.HasValue)
+            {
+                baseQuery = context.ScanRecords.AsNoTracking().Where(scan => scan.QRCodeId == parameters.QRCodeId.Value);
+            }
+            else
+            {
+                var userId = message.User.GetUserId();
+                // Limit to scans of QR codes owned by the current user
+                var ownedQrCodeIds = context.QRCodes.AsNoTracking().Where(q => q.OwnerId == userId).Select(q => q.Id);
+
+                baseQuery = context.ScanRecords.AsNoTracking().Where(scan => ownedQrCodeIds.Contains(scan.QRCodeId));
+            }
 
             var lifetimeScans = await baseQuery.CountAsync(cancellationToken);
 
