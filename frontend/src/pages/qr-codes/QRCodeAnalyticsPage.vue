@@ -301,6 +301,7 @@ const dailyLineOptions = computed((): ApexOptions => {
       type: 'line',
       toolbar: { show: false },
       animations: { enabled: false },
+      zoom: { enabled: false },
     },
     stroke: {
       curve: 'smooth',
