@@ -40,7 +40,7 @@ import ScanRecordService, {
 import type { QTableProps } from 'quasar';
 
 const route = useRoute();
-const { t } = useI18n();
+const { t, locale } = useI18n();
 
 const qrCodeId = ref<string>(route.params.id as string);
 const qrCodeName = ref<string>('');
@@ -57,7 +57,10 @@ const loading = ref(false);
 const scanRecordsPaginated = ref<ScanRecordsResponse>();
 const scanRecords = computed(() => scanRecordsPaginated.value?.items ?? []);
 
-const breadcrumbs = computed(() => [{ label: 'QR Codes', to: '/qr-codes' }, { label: qrCodeName.value || '' }]);
+const breadcrumbs = computed(() => [
+  { label: 'QR Codes', to: '/qr-codes' },
+  { label: qrCodeName.value || t('analytics.title') },
+]);
 
 const columns = computed<QTableProps['columns']>(() => [
   {
@@ -87,6 +90,16 @@ const columns = computed<QTableProps['columns']>(() => [
     field: 'country',
     align: 'left',
     sortable: true,
+  },
+  {
+    name: 'createdAt',
+    label: t('analytics.scan_time'),
+    field: 'createdAt',
+    align: 'right',
+    sortable: true,
+    format(val) {
+      return new Date(val).toLocaleString(locale.value);
+    },
   },
 ]);
 
