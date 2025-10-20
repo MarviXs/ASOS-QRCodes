@@ -82,17 +82,17 @@
         <div class="col-12 col-lg-8">
           <q-card class="shadow chart-card">
             <q-card-section>
-              <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
-                {{ t('analytics.daily_scans_chart') }}
-              </div>
-              <div class="chart-container">
-                <template v-if="hasDailyData">
-                  <apexchart type="line" height="320" :series="dailyLineSeries" :options="dailyLineOptions" />
-                </template>
-                <div v-else class="chart-empty text-secondary text-weight-medium">
-                  {{ t('analytics.no_chart_data') }}
-                </div>
-              </div>
+          <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+            {{ t('analytics.daily_scans_chart') }}
+          </div>
+          <div class="chart-container">
+            <template v-if="hasDailyData">
+              <apexchart type="line" height="320" width="100%" :series="dailyLineSeries" :options="dailyLineOptions" />
+            </template>
+            <div v-else class="chart-empty text-secondary text-weight-medium">
+              {{ t('analytics.no_chart_data') }}
+            </div>
+          </div>
             </q-card-section>
             <q-inner-loading :showing="analyticsLoading">
               <q-spinner color="primary" />
@@ -389,7 +389,8 @@ const countriesChartOptions = computed(
     },
     plotOptions: {
       bar: {
-        columnWidth: '45%',
+        horizontal: true,
+        barHeight: '60%',
         borderRadius: 6,
       },
     },
@@ -397,14 +398,6 @@ const countriesChartOptions = computed(
       enabled: false,
     },
     xaxis: {
-      categories: countryLabels.value,
-      labels: {
-        rotateAlways: true,
-        rotate: -35,
-        trim: true,
-      },
-    },
-    yaxis: {
       min: 0,
       forceNiceScale: true,
       labels: {
@@ -413,6 +406,9 @@ const countriesChartOptions = computed(
           return numberFormatter.value.format(Math.max(0, numeric));
         },
       },
+    },
+    yaxis: {
+      categories: countryLabels.value,
     },
     tooltip: {
       y: {
@@ -429,10 +425,8 @@ const countriesChartOptions = computed(
       {
         breakpoint: 1024,
         options: {
-          plotOptions: {
-            bar: {
-              columnWidth: '55%',
-            },
+          chart: {
+            height: 320,
           },
         },
       },
@@ -860,13 +854,22 @@ watch(
   width: 100%;
   min-height: 240px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
   justify-content: center;
+  align-items: stretch;
+}
+
+.chart-container :deep(.apexcharts-canvas),
+.chart-container :deep(svg) {
+  width: 100% !important;
 }
 
 .chart-empty {
   width: 100%;
   padding: 1.5rem 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .analytics-table {
