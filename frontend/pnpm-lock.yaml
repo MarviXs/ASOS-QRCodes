@@ -38,9 +38,6 @@ importers:
       vue:
         specifier: ^3.5.3
         version: 3.5.22(typescript@5.9.3)
-      vue-apexcharts:
-        specifier: ^1.7.0
-        version: 1.7.0(apexcharts@5.3.5)(vue@3.5.22(typescript@5.9.3))
       vue-i18n:
         specifier: ^9.14.0
         version: 9.14.5(vue@3.5.22(typescript@5.9.3))
@@ -50,6 +47,9 @@ importers:
       vue-router:
         specifier: ^4.4.3
         version: 4.6.3(vue@3.5.22(typescript@5.9.3))
+      vue3-apexcharts:
+        specifier: ^1.10.0
+        version: 1.10.0(apexcharts@5.3.5)(vue@3.5.22(typescript@5.9.3))
       vue3-google-login:
         specifier: ^2.0.33
         version: 2.0.34(vue@3.5.22(typescript@5.9.3))
@@ -3023,12 +3023,6 @@ packages:
   vscode-uri@3.1.0:
     resolution: {integrity: sha512-/BpdSx+yCQGnCvecbyXdxHDkuk55/G3xwnC0GqY4gmQ3j+A+g8kzzgB4Nk/SINjqn6+waqw3EgbVF2QKExkRxQ==}
 
-  vue-apexcharts@1.7.0:
-    resolution: {integrity: sha512-QMpvBllJ1XvFsK4dwcbyxKalVpHfJnoqsNWszY55HJk/Sn7WP1f5YUv4JIzugqu4GTQB6gLcCVwwPDQFtwr0oQ==}
-    peerDependencies:
-      apexcharts: '>=4.0.0'
-      vue: ^2.5.17
-
   vue-demi@0.14.10:
     resolution: {integrity: sha512-nMZBOwuzabUO0nLgIcc6rycZEebF6eeUfaiQx9+WSk8e29IbLvPU9feI6tqW4kTo3hvoYAJkMh8n8D0fuISphg==}
     engines: {node: '>=12'}
@@ -3073,6 +3067,12 @@ packages:
     hasBin: true
     peerDependencies:
       typescript: '>=5.0.0'
+
+  vue3-apexcharts@1.10.0:
+    resolution: {integrity: sha512-sBma2In4rU5n/JBrv8KVb8if+IoY019Dse2yRDD/eRU1WGZHK07zuy9erefKzbJ7T3wP9+Jsy9bH6Vdjy85HZg==}
+    peerDependencies:
+      apexcharts: '>=4.0.0'
+      vue: '>=3.0.0'
 
   vue3-google-login@2.0.34:
     resolution: {integrity: sha512-YLEYcv8eKzA7BLsTciDogvxXxyJga4879HkmvWjYsm1t0mJ0Vx5A1EWKMx0YCtMQ2VwQJGy3F8aOw6zO+KkUhA==}
@@ -6031,11 +6031,6 @@ snapshots:
 
   vscode-uri@3.1.0: {}
 
-  vue-apexcharts@1.7.0(apexcharts@5.3.5)(vue@3.5.22(typescript@5.9.3)):
-    dependencies:
-      apexcharts: 5.3.5
-      vue: 3.5.22(typescript@5.9.3)
-
   vue-demi@0.14.10(vue@3.5.22(typescript@5.9.3)):
     dependencies:
       vue: 3.5.22(typescript@5.9.3)
@@ -6086,6 +6081,11 @@ snapshots:
       '@volar/typescript': 2.4.23
       '@vue/language-core': 3.1.1(typescript@5.9.3)
       typescript: 5.9.3
+
+  vue3-apexcharts@1.10.0(apexcharts@5.3.5)(vue@3.5.22(typescript@5.9.3)):
+    dependencies:
+      apexcharts: 5.3.5
+      vue: 3.5.22(typescript@5.9.3)
 
   vue3-google-login@2.0.34(vue@3.5.22(typescript@5.9.3)):
     dependencies:
