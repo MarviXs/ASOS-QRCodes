@@ -38,6 +38,7 @@ public class AppDbContext
     }
     public DbSet<RefreshToken> RefreshTokens { get; set; }
     public DbSet<QRCode> QRCodes { get; set; }
+    public DbSet<ScanRecord> ScanRecords { get; set; }
 
     public override int SaveChanges()
     {

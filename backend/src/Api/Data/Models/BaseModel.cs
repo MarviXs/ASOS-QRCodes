@@ -1,5 +1,3 @@
-
-
 using MediatR;
 
 namespace Fei.Is.Api.Data.Models;
