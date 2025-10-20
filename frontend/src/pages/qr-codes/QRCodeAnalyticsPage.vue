@@ -82,17 +82,23 @@
         <div class="col-12 col-lg-8">
           <q-card class="shadow chart-card">
             <q-card-section>
-          <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
-            {{ t('analytics.daily_scans_chart') }}
-          </div>
-          <div class="chart-container">
-            <template v-if="hasDailyData">
-              <apexchart type="line" height="320" width="100%" :series="dailyLineSeries" :options="dailyLineOptions" />
-            </template>
-            <div v-else class="chart-empty text-secondary text-weight-medium">
-              {{ t('analytics.no_chart_data') }}
-            </div>
-          </div>
+              <div class="chart-title text-subtitle1 text-secondary text-weight-medium">
+                {{ t('analytics.daily_scans_chart') }}
+              </div>
+              <div class="chart-container">
+                <template v-if="hasDailyData">
+                  <apexchart
+                    type="line"
+                    height="320"
+                    width="100%"
+                    :series="dailyLineSeries"
+                    :options="dailyLineOptions"
+                  />
+                </template>
+                <div v-else class="chart-empty text-secondary text-weight-medium">
+                  {{ t('analytics.no_chart_data') }}
+                </div>
+              </div>
             </q-card-section>
             <q-inner-loading :showing="analyticsLoading">
               <q-spinner color="primary" />
@@ -367,11 +373,13 @@ const deviceTypeSeries = computed(() => deviceTypeData.value.map((item) => item.
 const hasDeviceTypeData = computed(() => deviceTypeSeries.value.length > 0);
 
 const countriesData = computed(() => sortCategoryCounts(scanAnalytics.value?.countries ?? []));
-const countryLabels = computed(() => countriesData.value.map((item) => item.name));
 const countriesChartSeries = computed(() => [
   {
     name: scansLabel.value,
-    data: countriesData.value.map((item) => item.count),
+    data: countriesData.value.map((item) => ({
+      x: item.name,
+      y: item.count,
+    })),
   },
 ]);
 const hasCountryData = computed(() => countriesData.value.length > 0);
@@ -399,16 +407,13 @@ const countriesChartOptions = computed(
     },
     xaxis: {
       min: 0,
-      forceNiceScale: true,
       labels: {
-        formatter(value: number) {
-          const numeric = Number.isFinite(value) ? value : 0;
-          return numberFormatter.value.format(Math.max(0, numeric));
+        formatter(value: string) {
+          const numeric = Number(value);
+          const safeValue = Number.isFinite(numeric) ? Math.max(0, numeric) : 0;
+          return numberFormatter.value.format(safeValue);
         },
       },
-    },
-    yaxis: {
-      categories: countryLabels.value,
     },
     tooltip: {
       y: {
