@@ -67,7 +67,15 @@ public static class LoginByGoogle
                 return Result.Fail(new ValidationError(result));
             }
 
-            Payload payload = await ValidateAsync(message.GoogleToken);
+            Payload payload;
+            try
+            {
+                payload = await ValidateAsync(message.GoogleToken);
+            }
+            catch (InvalidJwtException)
+            {
+                return Result.Fail(new LoginFailedError());
+            }
             var user = await userManager.FindByEmailAsync(payload.Email);
 
             if (user == null) // Register user if not exists
