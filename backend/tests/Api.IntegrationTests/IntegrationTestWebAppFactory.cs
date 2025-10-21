@@ -19,6 +19,7 @@ namespace Fei.Is.Api.IntegrationTests;
 public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsyncLifetime
 {
     public Guid DefaultUserId { get; set; } = Guid.Parse("00000000-0000-0000-0000-000000000001");
+    public Guid OtherUserId { get; set; } = Guid.Parse("00000000-0000-0000-0000-000000000002");
     private Respawner? _respawner;
 
     private readonly PostgreSqlContainer _appDbContainer = new PostgreSqlBuilder()
@@ -98,7 +99,7 @@ public class IntegrationTestWebAppFactory : WebApplicationFactory<Program>, IAsy
 
         var testUser2 = new ApplicationUser
         {
-            Id = Guid.Parse("00000000-0000-0000-0000-000000000002"),
+            Id = OtherUserId,
             UserName = "admin2@test.com",
             Email = "admin2@test.com",
         };
