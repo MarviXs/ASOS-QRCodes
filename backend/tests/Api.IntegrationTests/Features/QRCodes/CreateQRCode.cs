@@ -49,16 +49,19 @@ public class CreateQRCodeTests(IntegrationTestWebAppFactory factory) : BaseInteg
 
         var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
         problem.Should().NotBeNull();
-        problem!.Errors.Keys.Should().Contain(new[]
-        {
-            "Request.DisplayName",
-            "Request.RedirectUrl",
-            "Request.ShortCode",
-            "Request.DotStyle",
-            "Request.CornerDotStyle",
-            "Request.CornerSquareStyle",
-            "Request.Color"
-        });
+        problem!
+            .Errors.Keys.Should()
+            .Contain(
+                [
+                    "Request.DisplayName",
+                    "Request.RedirectUrl",
+                    "Request.ShortCode",
+                    "Request.DotStyle",
+                    "Request.CornerDotStyle",
+                    "Request.CornerSquareStyle",
+                    "Request.Color"
+                ]
+            );
     }
 }
 

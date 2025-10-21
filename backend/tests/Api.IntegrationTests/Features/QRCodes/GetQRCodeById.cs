@@ -5,7 +5,7 @@ using Fei.Is.Api.IntegrationTests.Common;
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fei.Is.Api.IntegrationTests.Features.Commands;
+namespace Fei.Is.Api.IntegrationTests.Features.QRCodes;
 
 [Collection("IntegrationTests")]
 public class GetQRCodeByIdTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)

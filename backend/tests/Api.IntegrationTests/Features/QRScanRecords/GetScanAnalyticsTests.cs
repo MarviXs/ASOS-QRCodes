@@ -10,15 +10,9 @@ using Microsoft.AspNetCore.Mvc;
 namespace Fei.Is.Api.IntegrationTests.Features.QRScanRecords;
 
 [Collection("IntegrationTests")]
-public class GetScanAnalyticsTests : BaseIntegrationTest
+public class GetScanAnalyticsTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
-    private readonly IntegrationTestWebAppFactory _factory;
-
-    public GetScanAnalyticsTests(IntegrationTestWebAppFactory factory)
-        : base(factory)
-    {
-        _factory = factory;
-    }
+    private readonly IntegrationTestWebAppFactory _factory = factory;
 
     [Fact]
     public async Task GetScanAnalytics_ShouldReturnAggregatedStatistics()

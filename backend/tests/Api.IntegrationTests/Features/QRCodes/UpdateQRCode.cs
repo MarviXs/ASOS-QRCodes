@@ -7,7 +7,7 @@ using FluentAssertions;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 
-namespace Fei.Is.Api.IntegrationTests.Features.Commands;
+namespace Fei.Is.Api.IntegrationTests.Features.QRCodes;
 
 [Collection("IntegrationTests")]
 public class UpdateQRCodeTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)

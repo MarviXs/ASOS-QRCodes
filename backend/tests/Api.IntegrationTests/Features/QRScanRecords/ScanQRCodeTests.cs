@@ -7,15 +7,9 @@ using Microsoft.EntityFrameworkCore;
 namespace Fei.Is.Api.IntegrationTests.Features.QRScanRecords;
 
 [Collection("IntegrationTests")]
-public class ScanQRCodeTests : BaseIntegrationTest
+public class ScanQRCodeTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
 {
-    private readonly IntegrationTestWebAppFactory _factory;
-
-    public ScanQRCodeTests(IntegrationTestWebAppFactory factory)
-        : base(factory)
-    {
-        _factory = factory;
-    }
+    private readonly IntegrationTestWebAppFactory _factory = factory;
 
     [Fact]
     public async Task ScanQRCode_ShouldRedirectAndCreateScanRecord()

@@ -5,7 +5,7 @@ using Fei.Is.Api.Features.QRCodes.Queries;
 using Fei.Is.Api.IntegrationTests.Common;
 using FluentAssertions;
 
-namespace Fei.Is.Api.IntegrationTests.Features.Commands;
+namespace Fei.Is.Api.IntegrationTests.Features.QRCodes;
 
 [Collection("IntegrationTests")]
 public class GetQRCodesTests(IntegrationTestWebAppFactory factory) : BaseIntegrationTest(factory)
