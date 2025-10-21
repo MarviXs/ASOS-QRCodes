@@ -32,7 +32,7 @@ public static class UpdateQRCode
         {
             app.MapPut(
                     "qr-codes/{id:guid}",
-                    async Task<Results<NoContent, NotFound, ValidationProblem, Conflict>> (
+                    async Task<Results<NoContent, NotFound, ValidationProblem, Conflict, ForbidHttpResult>> (
                         IMediator mediator,
                         ClaimsPrincipal user,
                         Guid id,
@@ -54,6 +54,10 @@ public static class UpdateQRCode
                         else if (result.HasError<ConcurrencyError>())
                         {
                             return TypedResults.Conflict();
+                        }
+                        else if (result.HasError<ForbiddenError>())
+                        {
+                            return TypedResults.Forbid();
                         }
 
                         return TypedResults.NoContent();
