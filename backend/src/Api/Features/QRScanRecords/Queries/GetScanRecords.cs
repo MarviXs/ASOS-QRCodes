@@ -70,6 +70,7 @@ public static class GetScanRecords
         public async Task<Result<PagedList<Response>>> Handle(Query message, CancellationToken cancellationToken)
         {
             var qrCodeParameters = message.Parameters;
+            var userId = message.User.GetUserId();
 
             var query = context.ScanRecords.AsNoTracking().Include(sr => sr.QRCode).AsQueryable();
             if (qrCodeParameters.QRCodeId.HasValue)
@@ -86,6 +87,11 @@ public static class GetScanRecords
                 {
                     return Result.Fail(new ForbiddenError());
                 }
+            }
+            else
+            {
+                // No specific QRCodeId provided: restrict to scans of QR codes owned by the current user
+                query = query.Where(d => d.QRCode != null && d.QRCode.OwnerId == userId);
             }
 
             if (qrCodeParameters.StartDate.HasValue)
