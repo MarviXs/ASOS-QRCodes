@@ -37,4 +37,29 @@ public class GetQRCodeByIdTests(IntegrationTestWebAppFactory factory) : BaseInte
         qrCodeResponse.CornerSquareStyle.Should().Be(qrCode.CornerSquareStyle);
         qrCodeResponse.Color.Should().Be(qrCode.Color);
     }
+
+    [Fact]
+    public async Task GetQRCodeById_ShouldReturnNotFound_WhenQRCodeMissing()
+    {
+        // Act
+        var response = await Client.GetAsync($"qr-codes/{Guid.NewGuid()}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetQRCodeById_ShouldReturnForbid_WhenNotOwner()
+    {
+        // Arrange
+        var qrCode = new QRCodeFake(factory.OtherUserId).Generate();
+        await AppDbContext.QRCodes.AddAsync(qrCode);
+        await AppDbContext.SaveChangesAsync();
+
+        // Act
+        var response = await Client.GetAsync($"qr-codes/{qrCode.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
 }

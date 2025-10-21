@@ -38,4 +38,17 @@ public class ScanQRCodeTests : BaseIntegrationTest
         scanRecord.Should().NotBeNull();
         scanRecord!.QRCodeId.Should().Be(qrCode.Id);
     }
+
+    [Fact]
+    public async Task ScanQRCode_ShouldReturnNotFound_WhenShortCodeUnknown()
+    {
+        // Arrange
+        var client = _factory.CreateClient(new WebApplicationFactoryClientOptions { AllowAutoRedirect = false });
+
+        // Act
+        var response = await client.GetAsync("scan/unknown-code");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
 }

@@ -4,6 +4,7 @@ using Bogus;
 using Fei.Is.Api.Features.QRCodes.Commands;
 using Fei.Is.Api.IntegrationTests.Common;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fei.Is.Api.IntegrationTests.Features.Devices;
 
@@ -32,6 +33,32 @@ public class CreateQRCodeTests(IntegrationTestWebAppFactory factory) : BaseInteg
         createdQRCode.CornerDotStyle.Should().Be(qrCodeRequest.CornerDotStyle);
         createdQRCode.CornerSquareStyle.Should().Be(qrCodeRequest.CornerSquareStyle);
         createdQRCode.Color.Should().Be(qrCodeRequest.Color);
+    }
+
+    [Fact]
+    public async Task CreateQRCode_ShouldReturnValidationProblem_WhenMissingFields()
+    {
+        // Arrange
+        var request = new CreateQRCode.Request(string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty, string.Empty);
+
+        // Act
+        var response = await Client.PostAsJsonAsync("qr-codes", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        problem.Should().NotBeNull();
+        problem!.Errors.Keys.Should().Contain(new[]
+        {
+            "Request.DisplayName",
+            "Request.RedirectUrl",
+            "Request.ShortCode",
+            "Request.DotStyle",
+            "Request.CornerDotStyle",
+            "Request.CornerSquareStyle",
+            "Request.Color"
+        });
     }
 }
 

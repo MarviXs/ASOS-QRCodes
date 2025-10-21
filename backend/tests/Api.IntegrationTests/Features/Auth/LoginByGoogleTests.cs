@@ -25,4 +25,17 @@ public class LoginByGoogleTests(IntegrationTestWebAppFactory factory) : BaseInte
         problem.Should().NotBeNull();
         problem!.Errors.Should().ContainKey("GoogleToken");
     }
+
+    [Fact]
+    public async Task LoginByGoogle_ShouldReturnUnauthorized_WhenTokenInvalid()
+    {
+        // Arrange
+        var request = new LoginByGoogle.Request("invalid-token");
+
+        // Act
+        var response = await Client.PostAsJsonAsync("auth/google", request);
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Unauthorized);
+    }
 }

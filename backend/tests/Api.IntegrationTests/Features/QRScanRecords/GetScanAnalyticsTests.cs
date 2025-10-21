@@ -5,6 +5,7 @@ using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Features.QRScanRecords.Queries;
 using Fei.Is.Api.IntegrationTests.Common;
 using FluentAssertions;
+using Microsoft.AspNetCore.Mvc;
 
 namespace Fei.Is.Api.IntegrationTests.Features.QRScanRecords;
 
@@ -85,5 +86,62 @@ public class GetScanAnalyticsTests : BaseIntegrationTest
 
         analytics.Countries.Should().ContainSingle(c => c.Name == "United States" && c.Count == 2);
         analytics.DeviceTypes.Should().ContainSingle(d => d.Name == DeviceType.Desktop.ToString() && d.Count == 2);
+    }
+
+    [Fact]
+    public async Task GetScanAnalytics_ShouldReturnNotFound_WhenQRCodeMissing()
+    {
+        // Act
+        var response = await Client.GetAsync($"scan-records/analytics?QRCodeId={Guid.NewGuid()}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.NotFound);
+    }
+
+    [Fact]
+    public async Task GetScanAnalytics_ShouldReturnForbid_WhenQRCodeNotOwned()
+    {
+        // Arrange
+        var qrCode = new QRCodeFake(_factory.OtherUserId).Generate();
+        await AppDbContext.QRCodes.AddAsync(qrCode);
+        await AppDbContext.SaveChangesAsync();
+
+        // Act
+        var response = await Client.GetAsync($"scan-records/analytics?QRCodeId={qrCode.Id}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.Forbidden);
+    }
+
+    [Fact]
+    public async Task GetScanAnalytics_ShouldReturnValidationProblem_WhenDateRangeInvalid()
+    {
+        // Arrange
+        var start = DateTime.UtcNow;
+        var end = start.AddDays(-1);
+
+        // Act
+        var response = await Client.GetAsync($"scan-records/analytics?StartDate={start:O}&EndDate={end:O}");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        problem.Should().NotBeNull();
+        problem!.Errors.Should().ContainKey("EndDate");
+    }
+
+    [Fact]
+    public async Task GetScanAnalytics_ShouldReturnValidationProblem_WhenQRCodeIdEmpty()
+    {
+        // Act
+        var response = await Client.GetAsync("scan-records/analytics?QRCodeId=00000000-0000-0000-0000-000000000000");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.BadRequest);
+
+        var problem = await response.Content.ReadFromJsonAsync<ValidationProblemDetails>();
+        problem.Should().NotBeNull();
+        problem!.Errors.Should().ContainKey("QRCodeId");
     }
 }

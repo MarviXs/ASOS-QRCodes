@@ -4,7 +4,6 @@ using Fei.Is.Api.Common.Pagination;
 using Fei.Is.Api.Features.QRCodes.Queries;
 using Fei.Is.Api.IntegrationTests.Common;
 using FluentAssertions;
-using Microsoft.EntityFrameworkCore;
 
 namespace Fei.Is.Api.IntegrationTests.Features.Commands;
 
@@ -38,5 +37,46 @@ public class GetQRCodesTests(IntegrationTestWebAppFactory factory) : BaseIntegra
         qrCodeResponse.CornerDotStyle.Should().Be(qrCode.CornerDotStyle);
         qrCodeResponse.CornerSquareStyle.Should().Be(qrCode.CornerSquareStyle);
         qrCodeResponse.Color.Should().Be(qrCode.Color);
+    }
+
+    [Fact]
+    public async Task GetQRCodes_ShouldReturnEmptyList_WhenNoCodes()
+    {
+        // Arrange
+
+        // Act
+        var response = await Client.GetAsync("qr-codes");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var qrCodesResponse = await response.Content.ReadFromJsonAsync<PagedList<GetQRCodes.Response>>();
+        qrCodesResponse.Should().NotBeNull();
+        qrCodesResponse!.Items.Should().BeEmpty();
+        qrCodesResponse.TotalCount.Should().Be(0);
+    }
+
+    [Fact]
+    public async Task GetQRCodes_ShouldFilterBySearchTerm()
+    {
+        // Arrange
+        var matching = new QRCodeFake(factory.DefaultUserId).Generate();
+        matching.DisplayName = "Special Code";
+        var other = new QRCodeFake(factory.DefaultUserId).Generate();
+        other.DisplayName = "Other";
+
+        await AppDbContext.QRCodes.AddRangeAsync(matching, other);
+        await AppDbContext.SaveChangesAsync();
+
+        // Act
+        var response = await Client.GetAsync("qr-codes?SearchTerm=special");
+
+        // Assert
+        response.StatusCode.Should().Be(HttpStatusCode.OK);
+
+        var qrCodesResponse = await response.Content.ReadFromJsonAsync<PagedList<GetQRCodes.Response>>();
+        qrCodesResponse.Should().NotBeNull();
+        qrCodesResponse!.Items.Should().HaveCount(1);
+        qrCodesResponse.Items[0].DisplayName.Should().Be("Special Code");
     }
 }
