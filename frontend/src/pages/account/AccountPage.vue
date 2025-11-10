@@ -6,7 +6,7 @@
           <div class="row items-stretch q-col-gutter-xl">
             <div class="col-12 col-lg-5">
               <div class="account-copy">
-                <div class="text-h5 text-weight-semibold">
+                <div class="text-h6 text-weight-semibold">
                   {{ t('account.password_title') }}
                 </div>
                 <p class="text-body2 text-weight-regular q-mt-sm">
@@ -21,19 +21,33 @@
                     <q-input
                       v-model="form.currentPassword"
                       :label="t('account.current_password')"
-                      type="password"
+                      :type="showCurrentPassword ? 'text' : 'password'"
                       autocomplete="current-password"
                       class="account-password-input"
-                      show-password
-                    />
+                    >
+                      <template #append>
+                        <q-icon
+                          :name="showCurrentPassword ? mdiEye : mdiEyeOff"
+                          class="cursor-pointer"
+                          @click="showCurrentPassword = !showCurrentPassword"
+                        />
+                      </template>
+                    </q-input>
                     <q-input
                       v-model="form.newPassword"
                       :label="t('account.new_password')"
-                      type="password"
+                      :type="showNewPassword ? 'text' : 'password'"
                       autocomplete="new-password"
                       class="account-password-input"
-                      show-password
-                    />
+                    >
+                      <template #append>
+                        <q-icon
+                          :name="showNewPassword ? mdiEye : mdiEyeOff"
+                          class="cursor-pointer"
+                          @click="showNewPassword = !showNewPassword"
+                        />
+                      </template>
+                    </q-input>
                     <div class="row justify-end">
                       <q-btn
                         type="submit"
@@ -62,6 +76,7 @@ import { useI18n } from 'vue-i18n';
 import AuthService, { type ChangePasswordRequest } from '@/api/services/AuthService';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
+import { mdiEye, mdiEyeOff } from '@quasar/extras/mdi-v7';
 
 type PasswordForm = {
   currentPassword: string;
@@ -75,6 +90,8 @@ const form = ref<PasswordForm>({
   newPassword: '',
 });
 const isSubmitting = ref(false);
+const showCurrentPassword = ref(false);
+const showNewPassword = ref(false);
 
 async function changePassword() {
   const payload: ChangePasswordRequest = {
