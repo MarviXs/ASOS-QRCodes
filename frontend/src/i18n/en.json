@@ -74,6 +74,15 @@
   "account": {
     "email": "Email Address",
     "password": "Password",
-    "logout": "Log Out"
+    "logout": "Log Out",
+    "password_title": "Change Password",
+    "password_description": "Update your password by confirming your current password and choosing a new one.",
+    "current_password": "Current Password",
+    "new_password": "New Password",
+    "confirm_password": "Confirm Password",
+    "change_password_button": "Change Password",
+    "password_mismatch": "The new passwords do not match.",
+    "password_changed": "Password updated successfully.",
+    "password_change_failed": "Failed to update password."
   }
 }

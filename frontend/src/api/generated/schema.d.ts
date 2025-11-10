@@ -4,6 +4,26 @@
  */
 
 export interface paths {
+    "/auth/change-password": {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        /**
+         * Change the current user password
+         * @description Allows an authenticated user to update their password by providing the current and new password.
+         */
+        post: operations["ChangePassword"];
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/auth/login": {
         parameters: {
             query?: never;
@@ -204,6 +224,10 @@ export interface components {
         };
         /** @enum {string} */
         "Fei.Is.Api.Data.Enums.DeviceType": "Desktop" | "Mobile" | "Tablet" | "Other";
+        "Fei.Is.Api.Features.Auth.Commands.ChangePassword.Request": {
+            currentPassword: string;
+            newPassword: string;
+        };
         "Fei.Is.Api.Features.Auth.Commands.Login.Request": {
             email: string;
             password: string;
@@ -344,6 +368,44 @@ export interface components {
 }
 export type $defs = Record<string, never>;
 export interface operations {
+    ChangePassword: {
+        parameters: {
+            query?: never;
+            header?: never;
+            path?: never;
+            cookie?: never;
+        };
+        requestBody: {
+            content: {
+                "application/json": components["schemas"]["Fei.Is.Api.Features.Auth.Commands.ChangePassword.Request"];
+            };
+        };
+        responses: {
+            /** @description No Content */
+            204: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+            /** @description Bad Request */
+            400: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content: {
+                    "application/problem+json": components["schemas"]["Microsoft.AspNetCore.Http.HttpValidationProblemDetails"];
+                };
+            };
+            /** @description Not Found */
+            404: {
+                headers: {
+                    [name: string]: unknown;
+                };
+                content?: never;
+            };
+        };
+    };
     Login: {
         parameters: {
             query?: never;

@@ -3,6 +3,7 @@ import type { paths } from '@/api/generated/schema.d.ts';
 
 export type LoginRequest = paths['/auth/login']['post']['requestBody']['content']['application/json'];
 export type RegisterRequest = paths['/auth/register']['post']['requestBody']['content']['application/json'];
+export type ChangePasswordRequest = paths['/auth/change-password']['post']['requestBody']['content']['application/json'];
 
 class AuthService {
   async login(body: LoginRequest) {
@@ -19,6 +20,10 @@ class AuthService {
 
   async register(body: RegisterRequest) {
     return await client.POST('/auth/register', { body });
+  }
+
+  async changePassword(body: ChangePasswordRequest) {
+    return await client.POST('/auth/change-password', { body });
   }
 }
 
