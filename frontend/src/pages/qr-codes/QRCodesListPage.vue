@@ -76,11 +76,17 @@
                 {{ t('global.analytics') }}
               </q-tooltip>
             </q-btn>
+            <q-btn :icon="mdiDownload" color="grey-color" flat round @click="downloadQRCode(props.row)">
+              <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
+                {{ t('global.download') }}
+              </q-tooltip>
+            </q-btn>
             <q-btn :icon="mdiPencil" color="grey-color" flat round :to="`/qr-codes/${props.row.id}/edit`">
               <q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
                 {{ t('global.edit') }}
               </q-tooltip>
             </q-btn>
+
             <q-btn :icon="mdiTrashCanOutline" color="grey-color" flat round @click="openDeleteDialog(props.row.id)"
               ><q-tooltip content-style="font-size: 11px" :offset="[0, 4]">
                 {{ t('global.delete') }}
@@ -96,7 +102,7 @@
 
 <script setup lang="ts">
 import { useI18n } from 'vue-i18n';
-import { mdiChartLine, mdiCodeTags, mdiPencil, mdiPlus, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
+import { mdiChartLine, mdiCodeTags, mdiPencil, mdiPlus, mdiDownload, mdiTrashCanOutline } from '@quasar/extras/mdi-v7';
 import PageLayout from '@/layouts/PageLayout.vue';
 import { computed, ref } from 'vue';
 import SearchBar from '@/components/core/SearchBar.vue';
@@ -109,6 +115,7 @@ import { watchDebounced } from '@vueuse/core';
 import DeleteQRCodeDialog from '@/components/qr-codes/DeleteQRCodeDialog.vue';
 import QRCodePreview from '@/components/qr-codes/QRCodePreview.vue';
 import { buildScanUrl } from '@/utils/qr-url';
+import QRCodeStyling, { type CornerDotType, type CornerSquareType, type DotType } from 'qr-code-styling';
 
 const { t, locale } = useI18n();
 const filter = ref('');
@@ -146,6 +153,58 @@ function formatUrl(url: string, shortCode: string) {
   } catch {
     return href.replace(/^https?:\/\//i, '');
   }
+}
+
+async function downloadQRCode(row: {
+  dotStyle: string;
+  cornerDotStyle: string;
+  cornerSquareStyle: string;
+  color: string;
+  shortCode: string;
+  displayName: any;
+}) {
+  const dotStyle = (row.dotStyle as DotType) || 'square';
+  const cornerDotStyle = (row.cornerDotStyle as CornerDotType) || 'square';
+  const cornerSquareStyle = (row.cornerSquareStyle as CornerSquareType) || 'square';
+  const color = row.color || '#000000';
+
+  const qrInstance = new QRCodeStyling({
+    width: 500,
+    height: 500,
+    data: buildScanUrl(row.shortCode),
+    dotsOptions: {
+      type: dotStyle,
+      color,
+    },
+    cornersDotOptions: {
+      type: cornerDotStyle,
+      color,
+    },
+    cornersSquareOptions: {
+      type: cornerSquareStyle,
+      color,
+    },
+    backgroundOptions: {
+      color: '#ffffff',
+    },
+    imageOptions: {
+      crossOrigin: 'anonymous',
+    },
+  });
+
+  const rawData = await qrInstance.getRawData('png');
+
+  const blob: Blob =
+    rawData instanceof Blob ? rawData : new Blob([rawData as unknown as BlobPart], { type: 'image/png' });
+
+  const url = URL.createObjectURL(blob);
+  const anchor = document.createElement('a');
+  anchor.href = url;
+  anchor.download = `${row.displayName || row.shortCode || 'qr-code'}.png`;
+  document.body.appendChild(anchor);
+  anchor.click();
+  anchor.remove();
+  URL.revokeObjectURL(url);
 }
 
 async function getQRcodes(paginationTable: PaginationTable) {
