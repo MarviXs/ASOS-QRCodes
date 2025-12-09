@@ -1,16 +1,17 @@
-import { test, expect } from '@playwright/test';
+import { test, expect, type Page } from '@playwright/test';
+
+async function dismissViteOverlay(page: Page) {
+  const overlay = page.locator('vite-plugin-checker-error-overlay');
+  if (await overlay.count()) {
+    await overlay.evaluateAll((nodes) => nodes.forEach((n) => n.remove()));
+  }
+}
 
 test('registers a new user', async ({ page }) => {
   const email = 'new-user@example.com';
   const password = 'StrongPass123!';
 
   let receivedBody: unknown;
-  const dismissViteOverlay = async () => {
-    const overlay = page.locator('vite-plugin-checker-error-overlay');
-    if (await overlay.count()) {
-      await overlay.evaluateAll((nodes) => nodes.forEach((n) => n.remove()));
-    }
-  };
 
   await page.route('**/auth/register', async (route) => {
     receivedBody = route.request().postDataJSON();
@@ -26,7 +27,7 @@ test('registers a new user', async ({ page }) => {
   await page.getByLabel('Email Address').fill(email);
   await page.getByLabel('Password').fill(password);
 
-  await dismissViteOverlay();
+  await dismissViteOverlay(page);
 
   const [request] = await Promise.all([
     page.waitForRequest('**/auth/register'),
