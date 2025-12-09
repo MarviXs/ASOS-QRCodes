@@ -89,6 +89,63 @@ test.describe('authenticated flows', () => {
     await expect(page.getByLabel('Display Name')).toBeVisible();
   });
 
+  test('creates a QR code', async ({ page }) => {
+    let receivedBody: Record<string, unknown> | undefined;
+
+    await page.route('http://localhost:5097/**', async (route) => {
+      const url = route.request().url();
+      const method = route.request().method();
+
+      if (url.endsWith('/qr-codes') && method === 'POST') {
+        receivedBody = route.request().postDataJSON();
+        await route.fulfill({
+          status: 201,
+          contentType: 'application/json',
+          body: JSON.stringify({ id: 'new-id' }),
+        });
+        return;
+      }
+
+      if (url.includes('/qr-codes') && method === 'GET') {
+        await route.fulfill({
+          status: 200,
+          contentType: 'application/json',
+          body: JSON.stringify(qrCodesResponse),
+        });
+        return;
+      }
+
+      await route.fulfill({
+        status: 200,
+        contentType: 'application/json',
+        body: JSON.stringify({}),
+      });
+    });
+
+    await authenticate(page);
+    await page.goto('/qr-codes/create');
+    await dismissViteOverlay(page);
+
+    await page.getByLabel('Display Name').fill('Playwright QR');
+    await page.getByLabel('URL').fill('https://playwright.dev');
+    await page.getByRole('textbox', { name: 'Color' }).fill('#123abc');
+
+    const [request] = await Promise.all([
+      page.waitForRequest((req) => req.url().includes('/qr-codes') && req.method() === 'POST'),
+      page.getByRole('button', { name: 'Create QR Code' }).click(),
+    ]);
+
+    await expect(page.getByText('QR Code created successfully!')).toBeVisible();
+    await expect(page).toHaveURL(/\/qr-codes$/);
+
+    expect(request.method()).toBe('POST');
+    expect(receivedBody).toMatchObject({
+      displayName: 'Playwright QR',
+      redirectUrl: 'https://playwright.dev',
+    });
+    expect(typeof receivedBody?.shortCode).toBe('string');
+  });
+
   test('submits password change on account page', async ({ page }) => {
     let receivedBody: unknown;
 
