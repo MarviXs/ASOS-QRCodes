@@ -195,7 +195,7 @@ flowchart TD
 
 - **Containerization:** **Docker**. The entire stack (Frontend, Backend, DB) is dockerized for consistent environments.
 - **Hosting Strategy:** Designed to run via `docker-compose`. Can be deployed to any VPS.
-* **Production Site:** The application is deployed at **[https://qr.smogrovic.com/](https://qr.smogrovic.com/)**. It is hosted on a **Hetzner VPS** running **Ubuntu 24.04** (LTS), utilizing Docker.
+- **Production Site:** The application is deployed at **[https://qr.smogrovic.com/](https://qr.smogrovic.com/)**. It is hosted on a **Hetzner VPS** running **Ubuntu 24.04** (LTS), utilizing Docker.
 
 ---
 
