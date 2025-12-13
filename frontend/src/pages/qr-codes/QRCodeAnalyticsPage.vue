@@ -17,7 +17,7 @@ const qrCodeId = ref<string | undefined>(typeof route.params.id === 'string' ? r
 const qrCodeName = ref<string>('');
 
 const breadcrumbs = computed(() => [
-  { label: 'QR Codes', to: '/qr-codes' },
+  { label: t('global.qr_codes'), to: '/qr-codes' },
   { label: qrCodeName.value || t('analytics.title') },
 ]);
 

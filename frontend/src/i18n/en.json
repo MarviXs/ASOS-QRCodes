@@ -1,5 +1,6 @@
 {
   "global": {
+    "menu": "Menu",
     "name": "Name",
     "search": "Search...",
     "account": "Account",
@@ -8,7 +9,8 @@
     "cancel": "Cancel",
     "url": "URL",
     "analytics": "Analytics",
-    "download": "Download"
+    "download": "Download",
+    "qr_codes": "QR Codes"
   },
   "table": {
     "no_data_label": "No data available",
@@ -44,7 +46,36 @@
   "qrcode": {
     "delete_qrcode": "Delete QR Code",
     "delete_qrcode_desc": "Are you sure you want to delete this QR code?",
+    "actions": {
+      "create": "Create QR Code",
+      "update": "Update QR Code",
+      "edit": "Edit QR Code"
+    },
+    "table": {
+      "qr_code": "QR Code",
+      "updated_at": "Updated At",
+      "created_at": "Created At"
+    },
+    "form": {
+      "display_name": "Display Name",
+      "color": "Color",
+      "open_color_picker": "Open color picker for {color}",
+      "body": "Body",
+      "outer_eye": "Outer Eye",
+      "inner_eye": "Inner Eye",
+      "shapes": {
+        "square": "Square",
+        "rounded": "Rounded",
+        "dots": "Dots",
+        "classy": "Classy",
+        "classy_rounded": "Classy Rounded",
+        "extra_rounded": "Extra Rounded",
+        "dot": "Dot"
+      }
+    },
     "toasts": {
+      "create_success": "QR Code created successfully!",
+      "update_success": "QR Code updated successfully!",
       "delete_success": "QR code deleted successfully."
     }
   },

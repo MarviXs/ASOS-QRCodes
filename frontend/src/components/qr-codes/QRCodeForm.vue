@@ -3,19 +3,19 @@
     <div class="col-12 col-md-6 col-lg-8">
       <q-card class="shadow q-px-lg q-py-lg">
         <q-form @submit.prevent="handleSubmit">
-          <q-input v-model="qrCodeData.displayName" label="Display Name" class="q-mb-md">
+          <q-input v-model="qrCodeData.displayName" :label="t('qrcode.form.display_name')" class="q-mb-md">
             <template v-slot:prepend>
               <q-icon :name="mdiPencil" />
             </template>
           </q-input>
-          <q-input v-model="qrCodeData.redirectUrl" label="URL" class="q-mb-md">
+          <q-input v-model="qrCodeData.redirectUrl" :label="t('global.url')" class="q-mb-md">
             <template v-slot:prepend>
               <q-icon :name="mdiLinkVariant" />
             </template>
           </q-input>
           <q-input
             v-model="colorInput"
-            label="Color"
+            :label="t('qrcode.form.color')"
             class="color-input q-mb-xl"
             spellcheck="false"
             autocorrect="off"
@@ -31,7 +31,7 @@
                 role="button"
                 tabindex="0"
                 :style="{ backgroundColor: circleColor }"
-                :aria-label="`Open color picker for ${circleColor}`"
+                :aria-label="t('qrcode.form.open_color_picker', { color: circleColor })"
                 @click.stop.prevent="openColorPicker"
                 @keyup.enter.prevent="openColorPicker"
                 @keydown.space.prevent="openColorPicker"
@@ -50,7 +50,7 @@
           </q-input>
           <div class="shape-selector q-mb-xl">
             <div class="shape-group q-mb-lg">
-              <div class="shape-group__title text-subtitle2 text-weight-medium q-mb-sm">Body</div>
+              <div class="shape-group__title text-subtitle2 text-weight-medium q-mb-sm">{{ t('qrcode.form.body') }}</div>
               <div class="shape-group__options">
                 <div
                   v-for="option in bodyShapeOptions"
@@ -64,12 +64,14 @@
                   @keyup.enter.prevent="selectBodyShape(option.value)"
                   @keydown.space.prevent="selectBodyShape(option.value)"
                 >
-                  <q-img :src="option.image" :alt="option.label" fit="contain" />
+                  <q-img :src="option.image" :alt="t(option.labelKey)" fit="contain" />
                 </div>
               </div>
             </div>
             <div class="shape-group q-mb-lg">
-              <div class="shape-group__title text-subtitle2 text-weight-medium q-mb-sm">Outer Eye</div>
+              <div class="shape-group__title text-subtitle2 text-weight-medium q-mb-sm">
+                {{ t('qrcode.form.outer_eye') }}
+              </div>
               <div class="shape-group__options">
                 <div
                   v-for="option in outerEyeOptions"
@@ -83,12 +85,14 @@
                   @keyup.enter.prevent="selectOuterEye(option.value)"
                   @keydown.space.prevent="selectOuterEye(option.value)"
                 >
-                  <q-img :src="option.image" :alt="option.label" fit="contain" />
+                  <q-img :src="option.image" :alt="t(option.labelKey)" fit="contain" />
                 </div>
               </div>
             </div>
             <div class="shape-group">
-              <div class="shape-group__title text-subtitle2 text-weight-medium q-mb-sm">Inner Eye</div>
+              <div class="shape-group__title text-subtitle2 text-weight-medium q-mb-sm">
+                {{ t('qrcode.form.inner_eye') }}
+              </div>
               <div class="shape-group__options">
                 <div
                   v-for="option in innerEyeOptions"
@@ -102,14 +106,14 @@
                   @keyup.enter.prevent="selectInnerEye(option.value)"
                   @keydown.space.prevent="selectInnerEye(option.value)"
                 >
-                  <q-img :src="option.image" :alt="option.label" fit="contain" />
+                  <q-img :src="option.image" :alt="t(option.labelKey)" fit="contain" />
                 </div>
               </div>
             </div>
           </div>
           <div class="row justify-end">
             <q-btn
-              label="Create QR Code"
+              :label="submitLabel"
               color="primary"
               unelevated
               size="15px"
@@ -134,6 +138,7 @@
 <script setup lang="ts">
 import { mdiLinkVariant, mdiPalette, mdiPencil } from '@quasar/extras/mdi-v7';
 import { computed, onMounted, ref, watch } from 'vue';
+import { useI18n } from 'vue-i18n';
 import QRCodeStyling, { type CornerDotType, type CornerSquareType, type DotType } from 'qr-code-styling';
 import { buildScanUrl } from '@/utils/qr-url';
 
@@ -151,9 +156,14 @@ defineProps({
     type: Boolean,
     required: true,
   },
+  submitLabel: {
+    type: String,
+    required: true,
+  },
 });
 const emit = defineEmits(['onSubmit']);
 const qrCodeData = defineModel<QRCodeFormData>();
+const { t } = useI18n();
 
 const fallbackColor = '#000000';
 const colorInput = ref(fallbackColor);
@@ -228,32 +238,32 @@ watch(colorInput, (newValue) => {
 
 const bodyShapeOptions = [
   {
-    label: 'Square',
+    labelKey: 'qrcode.form.shapes.square',
     value: 'square',
     image: new URL('../../assets/shapes/body/square.png', import.meta.url).href,
   },
   {
-    label: 'Rounded',
+    labelKey: 'qrcode.form.shapes.rounded',
     value: 'rounded',
     image: new URL('../../assets/shapes/body/rounded.png', import.meta.url).href,
   },
   {
-    label: 'Dots',
+    labelKey: 'qrcode.form.shapes.dots',
     value: 'dots',
     image: new URL('../../assets/shapes/body/dots.png', import.meta.url).href,
   },
   {
-    label: 'Classy',
+    labelKey: 'qrcode.form.shapes.classy',
     value: 'classy',
     image: new URL('../../assets/shapes/body/classy.png', import.meta.url).href,
   },
   {
-    label: 'Classy Rounded',
+    labelKey: 'qrcode.form.shapes.classy_rounded',
     value: 'classy-rounded',
     image: new URL('../../assets/shapes/body/classy_rounded.png', import.meta.url).href,
   },
   {
-    label: 'Extra Rounded',
+    labelKey: 'qrcode.form.shapes.extra_rounded',
     value: 'extra-rounded',
     image: new URL('../../assets/shapes/body/extra_rounded.png', import.meta.url).href,
   },
@@ -261,17 +271,17 @@ const bodyShapeOptions = [
 
 const outerEyeOptions = [
   {
-    label: 'Square',
+    labelKey: 'qrcode.form.shapes.square',
     value: 'square',
     image: new URL('../../assets/shapes/outer_eye/square.png', import.meta.url).href,
   },
   {
-    label: 'Dot',
+    labelKey: 'qrcode.form.shapes.dot',
     value: 'dot',
     image: new URL('../../assets/shapes/outer_eye/dot.png', import.meta.url).href,
   },
   {
-    label: 'Extra Rounded',
+    labelKey: 'qrcode.form.shapes.extra_rounded',
     value: 'extra-rounded',
     image: new URL('../../assets/shapes/outer_eye/extra_rounded.png', import.meta.url).href,
   },
@@ -279,12 +289,12 @@ const outerEyeOptions = [
 
 const innerEyeOptions = [
   {
-    label: 'Square',
+    labelKey: 'qrcode.form.shapes.square',
     value: 'square',
     image: new URL('../../assets/shapes/inner_eye/square.png', import.meta.url).href,
   },
   {
-    label: 'Dot',
+    labelKey: 'qrcode.form.shapes.dot',
     value: 'dot',
     image: new URL('../../assets/shapes/inner_eye/dot.png', import.meta.url).href,
   },

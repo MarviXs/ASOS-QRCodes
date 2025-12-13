@@ -1,8 +1,8 @@
 <template>
-  <q-layout view="lHh LpR lfr">
-    <q-header class="bg-white text-secondary shadow">
-      <q-toolbar>
-        <q-btn flat dense round :icon="mdiMenu" aria-label="Menu" @click="toggleLeftDrawer" />
+    <q-layout view="lHh LpR lfr">
+      <q-header class="bg-white text-secondary shadow">
+        <q-toolbar>
+        <q-btn flat dense round :icon="mdiMenu" :aria-label="t('global.menu')" @click="toggleLeftDrawer" />
         <q-space />
         <language-select class="q-mr-md"></language-select>
       </q-toolbar>
@@ -15,7 +15,7 @@
         </router-link>
         <div class="links">
           <side-menu-button to="/" :label="t('global.analytics')" :icon="mdiChartLine" />
-          <side-menu-button to="/qr-codes" label="QR Codes" :icon="mdiQrcode" />
+          <side-menu-button to="/qr-codes" :label="t('global.qr_codes')" :icon="mdiQrcode" />
         </div>
         <q-separator class="q-my-sm" />
         <div class="links user-links">

@@ -1,5 +1,5 @@
 <template>
-  <PageLayout :breadcrumbs="[{ label: 'QR Codes', to: '/qr-codes' }]">
+  <PageLayout :breadcrumbs="[{ label: t('global.qr_codes'), to: '/qr-codes' }]">
     <template #actions>
       <SearchBar v-model="filter" class="col-grow col-lg-auto" />
       <q-btn
@@ -8,7 +8,7 @@
         unelevated
         no-caps
         size="15px"
-        label="Create QR Code"
+        :label="t('qrcode.actions.create')"
         :icon="mdiPlus"
         to="/qr-codes/create"
       />
@@ -242,7 +242,7 @@ function openDeleteDialog(id: string) {
 const columns = computed<QTableProps['columns']>(() => [
   {
     name: 'qrCode',
-    label: 'QR Code',
+    label: t('qrcode.table.qr_code'),
     field: 'shortCode',
     sortable: false,
     align: 'left',
@@ -265,7 +265,7 @@ const columns = computed<QTableProps['columns']>(() => [
 
   {
     name: 'updatedAt',
-    label: 'Updated At',
+    label: t('qrcode.table.updated_at'),
     field: 'updatedAt',
     sortable: true,
     format(val) {
@@ -276,7 +276,7 @@ const columns = computed<QTableProps['columns']>(() => [
 
   {
     name: 'createdAt',
-    label: 'Created At',
+    label: t('qrcode.table.created_at'),
     field: 'createdAt',
     sortable: true,
     format(val) {

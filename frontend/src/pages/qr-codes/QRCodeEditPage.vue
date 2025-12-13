@@ -1,12 +1,18 @@
 <template>
   <PageLayout
     :breadcrumbs="[
-      { label: 'QR Codes', to: '/qr-codes' },
-      { label: 'Create QR Code', to: '/qr-codes/create' },
+      { label: t('global.qr_codes'), to: '/qr-codes' },
+      { label: t('qrcode.actions.edit') },
     ]"
   >
     <template #default>
-      <QRCodeForm v-if="!isFetchingQR" v-model="qrCodeData" :isLoading="isLoading" @onSubmit="updateQRCode" />
+      <QRCodeForm
+        v-if="!isFetchingQR"
+        v-model="qrCodeData"
+        :isLoading="isLoading"
+        :submit-label="t('qrcode.actions.update')"
+        @onSubmit="updateQRCode"
+      />
     </template>
   </PageLayout>
 </template>
@@ -18,9 +24,11 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { toast } from 'vue3-toastify';
 
 const router = useRouter();
+const { t } = useI18n();
 const qrCodeId = router.currentRoute.value.params.id as string;
 
 const qrCodeData = ref<QRCodeFormData>({
@@ -73,7 +81,7 @@ async function updateQRCode(data: QRCodeFormData) {
     handleError(submitResponse.error, 'Failed to update QR Code');
     return;
   }
-  toast.success('QR Code updated successfully!');
+  toast.success(t('qrcode.toasts.update_success'));
   router.push(`/qr-codes`);
 }
 </script>

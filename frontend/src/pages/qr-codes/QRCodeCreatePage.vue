@@ -1,12 +1,17 @@
 <template>
   <PageLayout
     :breadcrumbs="[
-      { label: 'QR Codes', to: '/qr-codes' },
-      { label: 'Create QR Code', to: '/qr-codes/create' },
+      { label: t('global.qr_codes'), to: '/qr-codes' },
+      { label: t('qrcode.actions.create'), to: '/qr-codes/create' },
     ]"
   >
     <template #default>
-      <QRCodeForm v-model="qrCodeData" :isLoading="isLoading" @onSubmit="createQRCode" />
+      <QRCodeForm
+        v-model="qrCodeData"
+        :isLoading="isLoading"
+        :submit-label="t('qrcode.actions.create')"
+        @onSubmit="createQRCode"
+      />
     </template>
   </PageLayout>
 </template>
@@ -18,9 +23,11 @@ import PageLayout from '@/layouts/PageLayout.vue';
 import { handleError } from '@/utils/error-handler';
 import { ref } from 'vue';
 import { useRouter } from 'vue-router';
+import { useI18n } from 'vue-i18n';
 import { toast } from 'vue3-toastify';
 
 const router = useRouter();
+const { t } = useI18n();
 
 function generateShortCode() {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
@@ -60,7 +67,7 @@ async function createQRCode(data: QRCodeFormData) {
     return;
   }
 
-  toast.success('QR Code created successfully!');
+  toast.success(t('qrcode.toasts.create_success'));
   router.push(`/qr-codes`);
 }
 </script>

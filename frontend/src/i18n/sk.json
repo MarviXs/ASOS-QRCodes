@@ -1,0 +1,122 @@
+{
+  "global": {
+    "menu": "Menu",
+    "name": "Názov",
+    "search": "Hľadať...",
+    "account": "Účet",
+    "edit": "Upraviť",
+    "delete": "Vymazať",
+    "cancel": "Zrušiť",
+    "url": "URL",
+    "analytics": "Analytika",
+    "download": "Stiahnuť",
+    "qr_codes": "QR kódy"
+  },
+  "table": {
+    "no_data_label": "Nie sú k dispozícii žiadne údaje",
+    "loading_label": "Načítava sa...",
+    "rows_per_page_label": "Riadkov na stránku:"
+  },
+
+  "auth": {
+    "toasts": {
+      "logout_success": "Úspešne odhlásené!"
+    },
+    "login": {
+      "label": "Prihlásenie",
+      "login_btn": "Prihlásiť sa",
+      "no_account": "Nemáte účet?",
+      "sign_up": "Zaregistrovať sa",
+      "toasts": {
+        "login_success": "Úspešne prihlásené!",
+        "login_failed": "Prihlásenie zlyhalo. Skontrolujte svoje prihlasovacie údaje."
+      }
+    },
+    "register": {
+      "label": "Registrácia",
+      "register_btn": "Zaregistrovať sa",
+      "have_account": "Už máte účet?",
+      "login": "Prihlásiť sa",
+      "toasts": {
+        "register_success": "Registrácia bola úspešná! Prihláste sa.",
+        "register_failed": "Registrácia zlyhala. Skúste to znova."
+      }
+    }
+  },
+  "qrcode": {
+    "delete_qrcode": "Vymazať QR kód",
+    "delete_qrcode_desc": "Naozaj chcete vymazať tento QR kód?",
+    "actions": {
+      "create": "Vytvoriť QR kód",
+      "update": "Aktualizovať QR kód",
+      "edit": "Upraviť QR kód"
+    },
+    "table": {
+      "qr_code": "QR kód",
+      "updated_at": "Aktualizované",
+      "created_at": "Vytvorené"
+    },
+    "form": {
+      "display_name": "Zobrazovaný názov",
+      "color": "Farba",
+      "open_color_picker": "Otvoriť výber farby pre {color}",
+      "body": "Telo",
+      "outer_eye": "Vonkajšie oko",
+      "inner_eye": "Vnútorné oko",
+      "shapes": {
+        "square": "Štvorec",
+        "rounded": "Zaoblené",
+        "dots": "Bodky",
+        "classy": "Elegantné",
+        "classy_rounded": "Elegantné zaoblené",
+        "extra_rounded": "Veľmi zaoblené",
+        "dot": "Bodka"
+      }
+    },
+    "toasts": {
+      "create_success": "QR kód bol úspešne vytvorený!",
+      "update_success": "QR kód bol úspešne aktualizovaný!",
+      "delete_success": "QR kód bol úspešne vymazaný."
+    }
+  },
+  "analytics": {
+    "title": "Analytika QR kódu",
+    "browser": "Prehliadač",
+    "operating_system": "Operačný systém",
+    "device_type": "Typ zariadenia",
+    "country": "Krajina",
+    "scan_time": "Čas skenovania",
+    "date_range": "Rozsah dátumov",
+    "last_7_days": "Posledných 7 dní",
+    "last_14_days": "Posledných 14 dní",
+    "last_30_days": "Posledných 30 dní",
+    "last_90_days": "Posledných 90 dní",
+    "custom": "Vlastné",
+    "custom_range_title": "Vlastný rozsah dátumov",
+    "apply_range": "Použiť",
+    "scans_label": "Skenovania",
+    "scans_over_period": "Skenovania v tomto období",
+    "lifetime_scans": "Skenovania celkom",
+    "daily_scans_chart": "Skenovania za deň",
+    "countries_chart": "Krajiny",
+    "operating_systems_chart": "Operačné systémy",
+    "browsers_chart": "Prehliadače",
+    "device_types_chart": "Typy zariadení",
+    "qr_code_name": "QR kód",
+    "no_chart_data": "Žiadne údaje pre zvolený rozsah"
+  },
+  "account": {
+    "email": "E-mailová adresa",
+    "password": "Heslo",
+    "logout": "Odhlásiť sa",
+    "password_title": "Aktualizovať heslo",
+    "password_description": "Uistite sa, že váš účet používa dlhé, náhodné heslo, aby zostal bezpečný.",
+    "current_password": "Aktuálne heslo",
+    "new_password": "Nové heslo",
+    "confirm_password": "Potvrdiť heslo",
+    "change_password_button": "Uložiť",
+    "password_mismatch": "Nové heslá sa nezhodujú.",
+    "password_changed": "Heslo bolo úspešne aktualizované.",
+    "password_change_failed": "Nepodarilo sa aktualizovať heslo."
+  }
+}
