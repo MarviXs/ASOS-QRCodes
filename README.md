@@ -105,8 +105,10 @@ classDiagram
 ### Use Case Diagram
 <img width="895" height="756" alt="usecase" src="https://github.com/user-attachments/assets/b1547a07-830f-404a-b9b6-e21c1b751919" />
 
+### Sequence Diagram
+<img width="1099" height="1018" alt="sequence" src="https://github.com/user-attachments/assets/c79c818f-afe5-4b30-986a-5118d8449592" />
 
-### UML Activity Diagram
+### Activity Diagram
 
 ```mermaid
 flowchart TD
@@ -163,9 +165,6 @@ flowchart TD
  * **Monolithic Architecture:**
       * **Simplicity for Solo Development:** As a single developer working on the project, a monolith significantly reduces operational complexity compared to microservices. There is no need to manage inter-service communication.
       * **Ease of Deployment:** The entire project is packaged as a single Docker compose, simplifying the CI/CD pipeline and reducing hosting costs.
-
-  * **Vertical Slice Architecture (Backend):** Instead of distinct layers (Controller -\> Service -\> Repo), the app is organized by **Features** (e.g., `Features/Auth`, `Features/QRCodes`). This keeps related logic (Commands, Queries, Validators) together, reducing coupling and making maintenance easier.
-
   * **Vertical Slice Architecture (Backend):** Instead of distinct layers (Controller -\> Service -\> Repo), the app is organized by **Features** (e.g., `Features/Auth`, `Features/QRCodes`). This keeps related logic (Commands, Queries, Validators) together, reducing coupling and making maintenance easier.
   * **CQRS (Command Query Responsibility Segregation):** Implemented via **MediatR**. This separates read operations (Analytics) from write operations (Creating QRs/Scanning), allowing for optimized query handlers.
 
@@ -207,7 +206,7 @@ flowchart TD
 
   * **REST API:** The application exposes a RESTful API. Endpoints are defined using **Carter** modules (e.g., `app.MapPost("/login")`).
   * **Authentication:** Implements standard **Identity** with **JWT Access Tokens** and **Refresh Tokens**. Includes Google OAuth integration.
-  * **Database:** Configured via `AppDbContext` inheriting from `IdentityDbContext`. Migrations are applied via CLI.
+  * **Database:** Configured via `AppDbContext`. Migrations are applied via CLI.
 
 ### Frontend Implementation
 
@@ -216,15 +215,6 @@ flowchart TD
     2.  **QR Builder:** A reactive form where users input a URL and see a live preview of the QR code styles.
     3.  **QR List:** A data table with pagination and sorting to manage existing codes.
   * **UX Flow:** The application uses `vue-router` with route guards (`requiresAuth`) to protect private pages. Toast notifications (`vue3-toastify`) provide feedback for actions.
-
-### Database Schema Design
-
-The relational schema ensures data integrity.
-
-1.  **Users Table:** Stores credentials and profile info.
-2.  **QRCodes Table:** Stores the redirection logic (`RedirectUrl`, `ShortCode`) and JSON-based styling configurations (`DotStyle`, `Color`).
-3.  **ScanRecords Table:** A table recording every scan event with foreign keys linking back to the specific QR code.
-
 -----
 
 ## 6\. Testing
