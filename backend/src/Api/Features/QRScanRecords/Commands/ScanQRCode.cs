@@ -85,10 +85,19 @@ public static class ScanQRCode
                 deviceType = DeviceType.Mobile;
 
             var qrCodeId = qrCode.Id;
-            var ipAddress = request.Context.Connection.RemoteIpAddress;
+            var iPAddress = request.Context.Connection.RemoteIpAddress;
+            var country = "Unknown";
             var operatingSystem = osInfo.ToString();
             var browserInfo = browserName;
             var capturedDeviceType = deviceType;
+            try
+            {
+                country = iPAddress?.GetCountryName() ?? "Unknown";
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to get country from IP Address {IpAddress}", iPAddress);
+            }
 
             _ = Task.Run(async () =>
             {
@@ -97,15 +106,6 @@ public static class ScanQRCode
                     await using var scope = scopeFactory.CreateAsyncScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                    var country = "Unknown";
-                    try
-                    {
-                        country = ipAddress?.GetCountryName() ?? "Unknown";
-                    }
-                    catch (Exception ex)
-                    {
-                        logger.LogWarning(ex, "Failed to get country from IP Address {IpAddress}", ipAddress);
-                    }
 
                     db.ScanRecords.Add(
                         new ScanRecord
