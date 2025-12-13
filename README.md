@@ -59,7 +59,8 @@ The system follows a **Client-Server** architecture tailored with **Vertical Sli
 ```mermaid
 graph TD
     Client[User Browser / Mobile] -->|HTTPS| ReverseProxy[Caddy]
-    ReverseProxy -->|Static Files| Frontend[Vue 3 SPA]
+    ReverseProxy -->|Static Files| Nginx[Nginx]
+    Nginx -->|Serves| Frontend[Vue 3 SPA]
     ReverseProxy -->|API Requests| Backend[.NET 8 API]
     Backend -->|Reads/Writes| DB[(PostgreSQL)]
 ```
