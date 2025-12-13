@@ -85,7 +85,7 @@ public static class ScanQRCode
                 deviceType = DeviceType.Mobile;
 
             var qrCodeId = qrCode.Id;
-            var country = request.Context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown";
+            var ipAddress = request.Context.Connection.RemoteIpAddress;
             var operatingSystem = osInfo.ToString();
             var browserInfo = browserName;
             var capturedDeviceType = deviceType;
@@ -96,6 +96,8 @@ public static class ScanQRCode
                 {
                     await using var scope = scopeFactory.CreateAsyncScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
+
+                    var country = ipAddress?.GetCountryName() ?? "Unknown";
 
                     db.ScanRecords.Add(
                         new ScanRecord
