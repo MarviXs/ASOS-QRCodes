@@ -236,3 +236,6 @@ flowchart TD
   1.  User loads the landing page.
   2.  User logs in successfully.
   3.  User creates a QR code and verifies it appears in the list.
+ 
+### Test Execution Results
+<img width="574" height="903" alt="Screenshot 2025-12-13 233036" src="https://github.com/user-attachments/assets/4909b9f3-946d-44a3-8a29-a1dd7afa166d" />
