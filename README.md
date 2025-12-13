@@ -1,78 +1,240 @@
-# Project Setup
 
-This guide will walk you through setting up the development environment for the project.
+-----
 
-## Prerequisites
+# QR Manager
 
-- **Docker** installed on your system
-- **Node.js** and **npm** installed (for the frontend)
-- **.NET SDK 8.0** installed (for the backend)
-- **EF Core Global Tool** installed (for the backend)
+**Author:** Marek Šmogrovič  
+**Course:** ASOS  
+**Project:** QRManager
 
----
+-----
 
-## 1. Docker Setup
+## 1\. Documentation & Requirements
 
-Docker is used to manage services and databases for the project.
+### Problem Statement
 
-### Steps:
-1. Navigate to the Docker folder:
-   ```bash
-   cd ./docker
-   ```
-2. Copy the `.env.template` file to `.env`:
-   ```bash
-   cp .env.template .env
-   ```
-3. Start the Docker containers:
-   ```bash
-   docker compose up -d
-   ```
+Standard QR codes are static. Once printed, the destination URL cannot be changed. Additionally, businesses and individuals lack insight into who is scanning their codes, when, and from where. **QR Manager** solves this by providing **Dynamic QR Codes**, permanent QR codes that redirect to modifiable destination URLs. It also serves as a centralized platform to track scan performance and gather analytics.
 
----
+### Functional Requirements (Use Cases)
 
-## 2. Frontend Setup
+  * **User Authentication:** Users can register, login (via Email or Google), and manage their profiles. Secure session management using JWT and Refresh Tokens.
+  * **QR Code Management:**
+      * **Create:** Generate new dynamic QR codes with custom short-links.
+      * **Customize:** Users can customize the QR style (colors, dot shapes, corner styles).
+      * **Update:** Change the destination URL of a printed QR code instantly.
+      * **Delete:** Remove QR codes.
+  * **Scanning & Redirection:** The system handles incoming HTTP requests via short-codes, logs the scan data (User Agent, IP, Device Type), and redirects the user to the target URL.
+  * **Analytics Dashboard:** Users can view charts and statistics regarding their QR codes:
+      * Total scans over time.
+      * Device type distribution (Mobile, Desktop, Tablet).
+      * Geographic data (Country).
+      * Operating System and Browser stats.
 
-The frontend is built using Quasar Framework (Vue 3). Follow these steps to set it up:
+### Non-Functional Requirements
 
-### Steps:
-1. Navigate to the frontend folder:
-   ```bash
-   cd ./frontend
-   ```
-2. Install the required npm packages:
-   ```bash
-   npm install --legacy-peer-deps
-   ```
-3. Start the frontend development server:
-   ```bash
-   npm run dev
-   ```
+  * **Performance:** Redirection must occur in under 200ms to ensure a smooth user experience.
+  * **Scalability:** The architecture supports separation of concerns (CQRS) allowing the read (analytics) and write (scans) sides to scale independently.
+  * **Security:** Passwords hashed via Identity. API endpoints protected via JWT Bearer tokens.
+  * **Usability:** Responsive Web Design (RWD) ensuring the dashboard works on mobile and desktop devices.
 
----
+-----
 
-## 3. Backend Setup
+## 2\. Planning
 
-The backend is built using .NET Core 8.0 and uses Entity Framework (EF) Core for database management.
+### Team Roles
 
-### Steps:
-1. Install **.NET SDK 8.0** if it's not already installed.
-2. Install **Entity Framework Core Global Tool**:
-   ```bash
-   dotnet tool install --global dotnet-ef
-   ```
-3. Navigate to the backend API folder:
-   ```bash
-   cd ./backend/src/Api
-   ```
-4. Update the database schema for the DB:
-   ```bash
-   dotnet ef database update --context AppDbContext
-   dotnet ef database update --context TimeScaleDbContext
-   ```
-5. Run the backend API in watch mode:
-   ```bash
-   dotnet watch
-   ```
----
-You are now ready to develop and run the project.
+  * **Marek Šmogrovič:** Full Stack Developer, DevOps, QA, and Product Manager (Solo Project).
+
+### Project Timeline
+
+| Phase | Weeks | Activities |
+| :--- | :--- | :--- |
+| **Inception** | 1-2 | Requirement gathering, Tech stack selection, Database modeling, Repo setup. |
+| **Backend Core** | 3-4 | .NET 8 Setup, Identity/Auth implementation, PostgreSQL configuration, Docker setup. |
+| **Logic & API** | 5-6 | QR Code CRUD features, Styling logic, Redirection endpoint, Device detection logic. |
+| **Frontend Core** | 7-8 | Vue 3 + Quasar setup, Auth Pages (Login/Register), Layouts, API Client generation. |
+| **UI Implementation** | 9-10 | QR Code Builder UI, Dashboard Charts (ApexCharts), List views, State management (Pinia). |
+| **Testing & Polish** | 11 | Unit Testing (Vitest/xUnit), E2E Testing (Playwright), Bug fixing. |
+| **Deployment** | 12 | Docker Compose orchestration, Final documentation, Submission. |
+
+-----
+
+## 3\. Architecture & Design
+
+### High-Level Architecture
+
+The system follows a **Client-Server** architecture tailored with **Vertical Slice Architecture** on the backend.
+
+```mermaid
+graph TD
+    Client[User Browser / Mobile] -->|HTTPS| ReverseProxy[Caddy]
+    ReverseProxy -->|Static Files| Frontend[Vue 3 SPA]
+    ReverseProxy -->|API Requests| Backend[.NET 8 API]
+    Backend -->|Reads/Writes| DB[(PostgreSQL)]
+```
+
+### UML Class Diagram
+
+
+```mermaid
+classDiagram
+    class ApplicationUser {
+        +Guid Id
+        +String Email
+        +String PasswordHash
+    }
+    class QRCode {
+        +Guid Id
+        +String ShortCode
+        +String RedirectUrl
+        +String StylingConfig
+        +Guid OwnerId
+    }
+    class ScanRecord {
+        +Guid Id
+        +DateTime ScannedAt
+        +String DeviceType
+        +String Country
+        +String Browser
+        +Guid QRCodeId
+    }
+    ApplicationUser "1" --> "*" QRCode : Owns
+    QRCode "1" --> "*" ScanRecord : Has
+```
+
+### Use Case Diagram
+<img width="895" height="756" alt="usecase" src="https://github.com/user-attachments/assets/b1547a07-830f-404a-b9b6-e21c1b751919" />
+
+
+### User Flow Diagram
+```mermaid
+graph TD
+    %% Actors
+    Guest([Guest])
+    User([Authenticated User])
+    Public([Public Scanner])
+
+    %% Authentication Flow
+    subgraph Authentication
+        LoginPage[Login Page]
+        RegisterPage[Register Page]
+    end
+
+    Guest -->|Visits| LoginPage
+    Guest -->|Visits| RegisterPage
+    RegisterPage -->|Register Success| LoginPage
+    LoginPage -->|Login Success| Dashboard
+
+    %% Main Application Flow
+    subgraph "QR Manager Application"
+        Dashboard[Analytics Dashboard]
+        QRList[QR Codes List]
+        QRBuilder[QR Builder]
+    end
+
+    User --> Dashboard
+    
+    Dashboard -->|Navigate| QRList
+    QRList -->|Create / Edit| QRBuilder
+    QRBuilder -->|Save| QRList
+
+    %% Scanning Flow
+    subgraph "Scanning & Redirection"
+        ShortLink((Short Link))
+        AnalyticsLog[Log: Device, IP, Loc]
+        TargetURL[Destination URL]
+    end
+
+    Public -->|Scans Physical QR| ShortLink
+    ShortLink -->|Processing| AnalyticsLog
+    AnalyticsLog -.->|Async Write| Dashboard
+    ShortLink -->|302 Redirect| TargetURL
+```
+
+### Architecture Justification
+ * **Monolithic Architecture:**
+      * **Simplicity for Solo Development:** As a single developer working on the project, a monolith significantly reduces operational complexity compared to microservices. There is no need to manage inter-service communication.
+      * **Ease of Deployment:** The entire project is packaged as a single Docker compose, simplifying the CI/CD pipeline and reducing hosting costs.
+
+  * **Vertical Slice Architecture (Backend):** Instead of distinct layers (Controller -\> Service -\> Repo), the app is organized by **Features** (e.g., `Features/Auth`, `Features/QRCodes`). This keeps related logic (Commands, Queries, Validators) together, reducing coupling and making maintenance easier.
+
+  * **Vertical Slice Architecture (Backend):** Instead of distinct layers (Controller -\> Service -\> Repo), the app is organized by **Features** (e.g., `Features/Auth`, `Features/QRCodes`). This keeps related logic (Commands, Queries, Validators) together, reducing coupling and making maintenance easier.
+  * **CQRS (Command Query Responsibility Segregation):** Implemented via **MediatR**. This separates read operations (Analytics) from write operations (Creating QRs/Scanning), allowing for optimized query handlers.
+
+-----
+
+## 4\. Tech Stack Analysis
+
+### Frontend
+
+  * **Framework:** **Vue.js 3** (Composition API). Chosen for its lightweight nature and reactivity.
+  * **UI Library:** **Quasar Framework**. chosen for its comprehensive component library (Material Design) and out-of-the-box responsive grid, significantly speeding up solo development.
+  * **State Management:** **Pinia**. The modern standard for Vue state management.
+  * **Charts:** **ApexCharts**.
+
+### Backend
+
+  * **Language:** **C\# / .NET 8**. Chosen for strong typing, high performance, and robust tooling.
+  * **API Framework:** **ASP.NET Core Web API** (using **Carter** for Minimal APIs).
+  * **Libraries:**
+      * **MediatR:** For implementing the Mediator pattern and CQRS.
+      * **FluentValidation:** For robust request validation.
+      * **DeviceDetector.NET:** For parsing User-Agent strings during scans.
+
+### Database
+
+  * **Primary DB:** **PostgreSQL**. An open-source, robust relational database chosen for its reliability and support for complex queries needed for analytics.
+  * **ORM:** **Entity Framework Core**. Simplifies database interactions and migrations.
+
+### Deployment
+
+  * **Containerization:** **Docker**. The entire stack (Frontend, Backend, DB) is dockerized for consistent environments.
+  * **Hosting Strategy:** Designed to run via `docker-compose`. Can be deployed to any VPS.
+
+-----
+
+## 5\. Implementation
+
+### Backend Implementation
+
+  * **REST API:** The application exposes a RESTful API. Endpoints are defined using **Carter** modules (e.g., `app.MapPost("/login")`).
+  * **Authentication:** Implements standard **Identity** with **JWT Access Tokens** and **Refresh Tokens**. Includes Google OAuth integration.
+  * **Database:** Configured via `AppDbContext` inheriting from `IdentityDbContext`. Migrations are applied via CLI.
+
+### Frontend Implementation
+
+  * **Functional UI:**
+    1.  **Dashboard:** Displays aggregate statistics using ApexCharts.
+    2.  **QR Builder:** A reactive form where users input a URL and see a live preview of the QR code styles.
+    3.  **QR List:** A data table with pagination and sorting to manage existing codes.
+  * **UX Flow:** The application uses `vue-router` with route guards (`requiresAuth`) to protect private pages. Toast notifications (`vue3-toastify`) provide feedback for actions.
+
+### Database Schema Design
+
+The relational schema ensures data integrity.
+
+1.  **Users Table:** Stores credentials and profile info.
+2.  **QRCodes Table:** Stores the redirection logic (`RedirectUrl`, `ShortCode`) and JSON-based styling configurations (`DotStyle`, `Color`).
+3.  **ScanRecords Table:** A table recording every scan event with foreign keys linking back to the specific QR code.
+
+-----
+
+## 6\. Testing
+
+### Unit Tests
+
+  * **Backend:** Located in `tests/Api.UnitTests`. Uses **xUnit** to test handlers (e.g., `GetScanAnalyticsHandlerTests`, `QRCodeExtensionsTests`).
+  * **Frontend:** Located in `frontend/tests/unit`. Uses **Vitest** for testing utility functions (e.g., `date-utils`, `qr-url`) and component logic.
+
+### Integration Tests
+
+  * **Backend:** Located in `tests/Api.IntegrationTests`. Uses `WebApplicationFactory` to spin up an in-memory test server. Tests cover full API flows (Register -\> Login -\> Create QR).
+* **Database:** Integration tests utilize **Testcontainers** to spin up an isolated,  **PostgreSQL** Docker container for the testing. This ensures tests run against a real database instance rather than an in-memory mock, guaranteeing that EF Core configurations and queries are valid. To maintain test isolation and determinism, the **Respawn** library is used to reset the database state (checkpointing and cleaning tables) before every single test execution, ensuring a clean slate for each scenario.
+
+### System / End-to-End (E2E) Tests
+
+  * **Tool:** **Playwright** (configured in `frontend/playwright.config.ts`).
+  * **Scope:** Validates critical user journeys:
+    1.  User loads the landing page.
+    2.  User logs in successfully.
+    3.  User creates a QR code and verifies it appears in the list.
