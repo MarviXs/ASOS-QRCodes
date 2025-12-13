@@ -106,49 +106,57 @@ classDiagram
 <img width="895" height="756" alt="usecase" src="https://github.com/user-attachments/assets/b1547a07-830f-404a-b9b6-e21c1b751919" />
 
 
-### User Flow Diagram
+### UML Activity Diagram
+
 ```mermaid
-graph TD
-    %% Actors
-    Guest([Guest])
-    User([Authenticated User])
-    Public([Public Scanner])
+flowchart TD
+    %% --- Start ---
+    Start([User Visits App]) --> IsAuth{Has Account?}
 
-    %% Authentication Flow
-    subgraph Authentication
-        LoginPage[Login Page]
-        RegisterPage[Register Page]
+    %% --- Swimlane: Authentication ---
+    subgraph Auth_System [Authentication Phase]
+        direction TB
+        IsAuth -- No --> Register[Register Account]
+        IsAuth -- Yes --> Login[Login]
+        Register --> Login
     end
-
-    Guest -->|Visits| LoginPage
-    Guest -->|Visits| RegisterPage
-    RegisterPage -->|Register Success| LoginPage
-    LoginPage -->|Login Success| Dashboard
-
-    %% Main Application Flow
-    subgraph "QR Manager Application"
-        Dashboard[Analytics Dashboard]
-        QRList[QR Codes List]
-        QRBuilder[QR Builder]
-    end
-
-    User --> Dashboard
     
-    Dashboard -->|Navigate| QRList
-    QRList -->|Create / Edit| QRBuilder
-    QRBuilder -->|Save| QRList
+    Login -->|Success| Dashboard[Analytics Dashboard]
 
-    %% Scanning Flow
-    subgraph "Scanning & Redirection"
-        ShortLink((Short Link))
-        AnalyticsLog[Log: Device, IP, Loc]
-        TargetURL[Destination URL]
+    %% --- Swimlane: Management ---
+    subgraph Management_System [QR Management]
+        direction TB
+        Dashboard --> QRList[View QR List]
+        QRList --> Create[Create or Edit QR]
+        Create --> Config[Customize Style & URL]
+        Config --> SaveDB[Save to Database]
+        SaveDB --> QRList
     end
 
-    Public -->|Scans Physical QR| ShortLink
-    ShortLink -->|Processing| AnalyticsLog
-    AnalyticsLog -.->|Async Write| Dashboard
-    ShortLink -->|302 Redirect| TargetURL
+    %% Transition to Physical Context
+    SaveDB -.->|User Prints QR| PhysicalQR(Physical QR Code)
+
+    %% --- Swimlane: Scanning ---
+    subgraph Scanning_Logic [Scanning & Redirection Core]
+        direction TB
+        PhysicalQR --> RecReq[Receive HTTP Request]
+        
+        %% Fork for Parallel Processing
+        RecReq --> ForkBar@{ shape: fork }
+        
+        ForkBar --> Lookup[Lookup Destination URL]
+        ForkBar --> Parse[Parse Device/IP Metadata]
+        
+        Lookup --> Redirect[Return 302 Redirect]
+        Parse --> Log[Insert Scan Record]
+        
+        %% Join
+        Redirect --> JoinBar@{ shape: join }
+        Log --> JoinBar
+    end
+
+    %% --- End ---
+    JoinBar --> Target([User Lands on Website])
 ```
 
 ### Architecture Justification
