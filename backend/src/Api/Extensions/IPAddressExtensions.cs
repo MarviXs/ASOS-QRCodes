@@ -22,12 +22,15 @@ public static class IPAddressExtensions
 
         var lookupAddress = ipAddress.IsIPv4MappedToIPv6 ? ipAddress.MapToIPv4() : ipAddress;
 
-        var reader = GetReader(databasePath);
-
         try
         {
+            var reader = GetReader(databasePath);
             var response = reader.Country(lookupAddress);
             return response?.Country?.Name;
+        }
+        catch (FileNotFoundException)
+        {
+            return null;
         }
         catch (AddressNotFoundException)
         {

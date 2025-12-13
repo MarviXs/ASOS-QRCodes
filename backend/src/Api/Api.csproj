@@ -45,4 +45,11 @@
     <PackageReference Include="System.Configuration.ConfigurationManager" Version="9.0.0" />
     <PackageReference Include="System.Linq.Dynamic.Core" Version="1.6.9" />
   </ItemGroup>
+
+  <ItemGroup>
+    <Content Include="Data/GeoLite/*.mmdb">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+      <CopyToPublishDirectory>Always</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
 </Project>

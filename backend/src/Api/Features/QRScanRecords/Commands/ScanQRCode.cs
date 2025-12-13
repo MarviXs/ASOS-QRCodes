@@ -97,7 +97,15 @@ public static class ScanQRCode
                     await using var scope = scopeFactory.CreateAsyncScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-                    var country = ipAddress?.GetCountryName() ?? "Unknown";
+                    var country = "Unknown";
+                    try
+                    {
+                        country = ipAddress?.GetCountryName() ?? "Unknown";
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Failed to get country from IP Address {IpAddress}", ipAddress);
+                    }
 
                     db.ScanRecords.Add(
                         new ScanRecord
