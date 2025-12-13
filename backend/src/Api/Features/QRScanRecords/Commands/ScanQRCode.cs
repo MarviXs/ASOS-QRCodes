@@ -1,3 +1,4 @@
+using System.Net;
 using System.Security.Claims;
 using Carter;
 using DeviceDetectorNET;
@@ -85,7 +86,7 @@ public static class ScanQRCode
                 deviceType = DeviceType.Mobile;
 
             var qrCodeId = qrCode.Id;
-            var iPAddress = request.Context.Connection.RemoteIpAddress;
+            var iPAddress = request.Context.GetClientIpAddress();
             var country = "Unknown";
             var operatingSystem = osInfo.ToString();
             var browserInfo = browserName;
@@ -105,7 +106,6 @@ public static class ScanQRCode
                 {
                     await using var scope = scopeFactory.CreateAsyncScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
-
 
                     db.ScanRecords.Add(
                         new ScanRecord
@@ -129,6 +129,23 @@ public static class ScanQRCode
 
             return Result.Ok(new Response(qrCode.RedirectUrl));
         }
+    }
+
+    public static IPAddress? GetClientIpAddress(this HttpContext context)
+    {
+        if (context.Request.Headers.TryGetValue("X-Forwarded-For", out var forwardedFor))
+        {
+            var ipString = forwardedFor
+                .ToString()
+                .Split(',', StringSplitOptions.RemoveEmptyEntries | StringSplitOptions.TrimEntries)
+                .FirstOrDefault();
+
+            if (IPAddress.TryParse(ipString, out var ip))
+            {
+                return ip;
+            }
+        }
+        return context.Connection.RemoteIpAddress;
     }
 
     public record Response(string RedirectUrl);
