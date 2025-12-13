@@ -46,7 +46,7 @@ Standard QR codes are static. Once printed, the destination URL cannot be change
   * **Marek Šmogrovič:** Full Stack Developer, DevOps, QA, and Product Manager (Solo Project).
 
 ### Project Timeline
-<img width="1418" height="459" alt="gantt" src="https://github.com/user-attachments/assets/43bb3595-d4a6-4eb1-9dae-3f024bf615de" />
+<img width="1297" height="439" alt="gantt" src="https://github.com/user-attachments/assets/97e4f459-37f9-482e-8a57-dbecc104099a" />
 
 -----
 
