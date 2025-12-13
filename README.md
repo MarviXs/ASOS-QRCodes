@@ -1,8 +1,14 @@
 
 ---
-**Author:** Marek Šmogrovič  
-**Course:** ASOS  
-**Project:** QRManager
+# QR Manager
+**Website:** [https://qr.smogrovic.com/](https://qr.smogrovic.com/)
+
+**Author:** Marek Šmogrovič
+
+**Course:** I-ASOS
+
+**Project:** QR Manager
+
 ---
 
 ## 1\. Documentation & Requirements
