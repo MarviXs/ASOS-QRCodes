@@ -53,7 +53,8 @@ public static class ScanQRCode
 
     public record Query(string ShortCode, HttpContext Context) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
+    public sealed class Handler(AppDbContext context, IServiceScopeFactory scopeFactory, ILogger<Handler> logger)
+        : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
@@ -65,6 +66,7 @@ public static class ScanQRCode
             }
 
             var headers = request.Context.Request.Headers.ToDictionary(a => a.Key, a => a.Value.ToArray().FirstOrDefault());
+
             var clientHints = ClientHints.Factory(headers);
             var dd = new DeviceDetector(request.Context.Request.Headers["User-Agent"], clientHints);
             dd.SkipBotDetection();
@@ -76,32 +78,46 @@ public static class ScanQRCode
 
             var deviceType = DeviceType.Other;
             if (dd.IsDesktop())
-            {
                 deviceType = DeviceType.Desktop;
-            }
             else if (dd.IsTablet())
-            {
                 deviceType = DeviceType.Tablet;
-            }
             else if (dd.IsMobile())
-            {
                 deviceType = DeviceType.Mobile;
-            }
 
-            var scanRecord = new ScanRecord
+            var qrCodeId = qrCode.Id;
+            var country = request.Context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown";
+            var operatingSystem = osInfo.ToString();
+            var browserInfo = browserName;
+            var capturedDeviceType = deviceType;
+
+            _ = Task.Run(async () =>
             {
-                QRCodeId = qrCode.Id,
-                Country = request.Context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown",
-                OperatingSystem = osInfo.ToString(),
-                BrowserInfo = browserName,
-                DeviceType = deviceType,
-            };
-            context.ScanRecords.Add(scanRecord);
-            await context.SaveChangesAsync(cancellationToken);
+                try
+                {
+                    await using var scope = scopeFactory.CreateAsyncScope();
+                    var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
-            var response = new Response(qrCode.RedirectUrl);
+                    db.ScanRecords.Add(
+                        new ScanRecord
+                        {
+                            QRCodeId = qrCodeId,
+                            Country = country,
+                            OperatingSystem = operatingSystem,
+                            BrowserInfo = browserInfo,
+                            DeviceType = capturedDeviceType,
+                        }
+                    );
 
-            return Result.Ok(response);
+                    await db.SaveChangesAsync();
+                }
+                catch (Exception ex)
+                {
+                    // Swallow to never affect redirect, but log so you can diagnose failures
+                    logger.LogWarning(ex, "Failed to persist scan record for QRCodeId {QRCodeId}", qrCodeId);
+                }
+            });
+
+            return Result.Ok(new Response(qrCode.RedirectUrl));
         }
     }
 

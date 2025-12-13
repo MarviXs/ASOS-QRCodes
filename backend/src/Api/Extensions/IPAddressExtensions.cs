@@ -7,7 +7,7 @@ namespace Fei.Is.Api.Extensions;
 
 public static class IPAddressExtensions
 {
-    private const string DefaultDatabaseFileName = "GeoLite2-Country.mmdb";
+    private static readonly string DefaultDatabaseRelativePath = Path.Combine("Data", "GeoLite", "GeoLite2-Country.mmdb");
 
     private static readonly ConcurrentDictionary<string, Lazy<DatabaseReader>> ReaderCache = new(StringComparer.OrdinalIgnoreCase);
 
@@ -20,12 +20,7 @@ public static class IPAddressExtensions
             return null;
         }
 
-        var lookupAddress = ipAddress;
-
-        if (ipAddress.IsIPv4MappedToIPv6)
-        {
-            lookupAddress = ipAddress.MapToIPv4();
-        }
+        var lookupAddress = ipAddress.IsIPv4MappedToIPv6 ? ipAddress.MapToIPv4() : ipAddress;
 
         var reader = GetReader(databasePath);
 
@@ -47,7 +42,11 @@ public static class IPAddressExtensions
     private static DatabaseReader GetReader(string? databasePath)
     {
         var path = ResolveDatabasePath(databasePath);
-        var lazyReader = ReaderCache.GetOrAdd(path, key => new Lazy<DatabaseReader>(() => CreateReader(key), LazyThreadSafetyMode.ExecutionAndPublication));
+        var lazyReader = ReaderCache.GetOrAdd(
+            path,
+            key => new Lazy<DatabaseReader>(() => CreateReader(key), LazyThreadSafetyMode.ExecutionAndPublication)
+        );
+
         return lazyReader.Value;
     }
 
@@ -64,16 +63,12 @@ public static class IPAddressExtensions
     private static string ResolveDatabasePath(string? databasePath)
     {
         var basePath = AppContext.BaseDirectory;
+
         if (string.IsNullOrWhiteSpace(databasePath))
         {
-            return Path.Combine(basePath, DefaultDatabaseFileName);
+            return Path.GetFullPath(Path.Combine(basePath, DefaultDatabaseRelativePath));
         }
 
-        if (!Path.IsPathRooted(databasePath))
-        {
-            return Path.GetFullPath(Path.Combine(basePath, databasePath));
-        }
-
-        return Path.GetFullPath(databasePath);
+        return Path.IsPathRooted(databasePath) ? Path.GetFullPath(databasePath) : Path.GetFullPath(Path.Combine(basePath, databasePath));
     }
 }
