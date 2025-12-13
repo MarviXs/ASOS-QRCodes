@@ -53,7 +53,9 @@ public static class ScanQRCode
 
     public record Query(string ShortCode, HttpContext Context) : IRequest<Result<Response>>;
 
-    public sealed class Handler(AppDbContext context) : IRequestHandler<Query, Result<Response>>
+    // Drop-in replacement: added dbFactory + logger so we can fire-and-forget safely (no DbContext reuse off-thread).
+    public sealed class Handler(AppDbContext context, IDbContextFactory<AppDbContext> dbFactory, ILogger<Handler> logger)
+        : IRequestHandler<Query, Result<Response>>
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
@@ -64,45 +66,67 @@ public static class ScanQRCode
                 return Result.Fail(new NotFoundError());
             }
 
-            var headers = request.Context.Request.Headers.ToDictionary(a => a.Key, a => a.Value.ToArray().FirstOrDefault());
-            var clientHints = ClientHints.Factory(headers);
-            var dd = new DeviceDetector(request.Context.Request.Headers["User-Agent"], clientHints);
-            dd.SkipBotDetection();
-            dd.Parse();
+            SaveScanRecordInBackground(request.Context, qrCode.Id, dbFactory, logger);
 
-            var clientInfo = dd.GetClient();
-            var osInfo = OperatingSystemParser.GetOsFamily(dd.GetOs().Match?.Name ?? "Unknown");
-            var browserName = clientInfo.Match?.Name ?? "Unknown";
-
-            var deviceType = DeviceType.Other;
-            if (dd.IsDesktop())
-            {
-                deviceType = DeviceType.Desktop;
-            }
-            else if (dd.IsTablet())
-            {
-                deviceType = DeviceType.Tablet;
-            }
-            else if (dd.IsMobile())
-            {
-                deviceType = DeviceType.Mobile;
-            }
-
-            var scanRecord = new ScanRecord
-            {
-                QRCodeId = qrCode.Id,
-                Country = request.Context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown",
-                OperatingSystem = osInfo.ToString(),
-                BrowserInfo = browserName,
-                DeviceType = deviceType,
-            };
-            context.ScanRecords.Add(scanRecord);
-            await context.SaveChangesAsync(cancellationToken);
-
-            var response = new Response(qrCode.RedirectUrl);
-
-            return Result.Ok(response);
+            return Result.Ok(new Response(qrCode.RedirectUrl));
         }
+    }
+
+    private static void SaveScanRecordInBackground(HttpContext httpContext, Guid qrCodeId, IDbContextFactory<AppDbContext> dbFactory, ILogger logger)
+    {
+        var scanRecord = BuildScanRecord(httpContext, qrCodeId);
+
+        _ = Task.Run(async () =>
+        {
+            try
+            {
+                await using var db = await dbFactory.CreateDbContextAsync(CancellationToken.None);
+                db.ScanRecords.Add(scanRecord);
+                await db.SaveChangesAsync(CancellationToken.None);
+            }
+            catch (Exception ex)
+            {
+                logger.LogWarning(ex, "Failed to save QR scan record for QRCodeId {QRCodeId}", qrCodeId);
+            }
+        });
+    }
+
+    private static ScanRecord BuildScanRecord(HttpContext context, Guid qrCodeId)
+    {
+        var headers = context.Request.Headers.ToDictionary(a => a.Key, a => a.Value.ToArray().FirstOrDefault());
+
+        var clientHints = ClientHints.Factory(headers);
+
+        var dd = new DeviceDetector(context.Request.Headers["User-Agent"], clientHints);
+        dd.SkipBotDetection();
+        dd.Parse();
+
+        var clientInfo = dd.GetClient();
+        var osInfo = OperatingSystemParser.GetOsFamily(dd.GetOs().Match?.Name ?? "Unknown");
+        var browserName = clientInfo.Match?.Name ?? "Unknown";
+
+        var deviceType = DeviceType.Other;
+        if (dd.IsDesktop())
+        {
+            deviceType = DeviceType.Desktop;
+        }
+        else if (dd.IsTablet())
+        {
+            deviceType = DeviceType.Tablet;
+        }
+        else if (dd.IsMobile())
+        {
+            deviceType = DeviceType.Mobile;
+        }
+
+        return new ScanRecord
+        {
+            QRCodeId = qrCodeId,
+            Country = context.Connection.RemoteIpAddress?.GetCountryName() ?? "Unknown",
+            OperatingSystem = osInfo.ToString(),
+            BrowserInfo = browserName,
+            DeviceType = deviceType,
+        };
     }
 
     public record Response(string RedirectUrl);
