@@ -46,16 +46,7 @@ Standard QR codes are static. Once printed, the destination URL cannot be change
   * **Marek Šmogrovič:** Full Stack Developer, DevOps, QA, and Product Manager (Solo Project).
 
 ### Project Timeline
-
-| Phase | Weeks | Activities |
-| :--- | :--- | :--- |
-| **Inception** | 1-2 | Requirement gathering, Tech stack selection, Database modeling, Repo setup. |
-| **Backend Core** | 3-4 | .NET 8 Setup, Identity/Auth implementation, PostgreSQL configuration, Docker setup. |
-| **Logic & API** | 5-6 | QR Code CRUD features, Styling logic, Redirection endpoint, Device detection logic. |
-| **Frontend Core** | 7-8 | Vue 3 + Quasar setup, Auth Pages (Login/Register), Layouts, API Client generation. |
-| **UI Implementation** | 9-10 | QR Code Builder UI, Dashboard Charts (ApexCharts), List views, State management (Pinia). |
-| **Testing & Polish** | 11 | Unit Testing (Vitest/xUnit), E2E Testing (Playwright), Bug fixing. |
-| **Deployment** | 12 | Docker Compose orchestration, Final documentation, Submission. |
+<img width="1297" height="358" alt="gantt" src="https://github.com/user-attachments/assets/65af3cc9-b71d-41a8-ae04-80c6725629db" />
 
 -----
 
