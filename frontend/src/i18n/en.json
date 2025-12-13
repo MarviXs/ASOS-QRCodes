@@ -17,6 +17,9 @@
   },
 
   "auth": {
+    "toasts": {
+      "logout_success": "Successfully logged out!"
+    },
     "login": {
       "label": "Login",
       "login_btn": "Log In",
