@@ -15,7 +15,7 @@
 
 Standard QR codes are static. Once printed, the destination URL cannot be changed. Additionally, businesses and individuals lack insight into who is scanning their codes, when, and from where. **QR Manager** solves this by providing **Dynamic QR Codes**, permanent QR codes that redirect to modifiable destination URLs. It also serves as a centralized platform to track scan performance and gather analytics.
 
-### Functional Requirements (Use Cases)
+### Functional Requirements
 
   * **User Authentication:** Users can register, login (via Email or Google), and manage their profiles. Secure session management using JWT and Refresh Tokens.
   * **QR Code Management:**
