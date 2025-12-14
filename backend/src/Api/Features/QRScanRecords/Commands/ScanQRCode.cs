@@ -91,19 +91,18 @@ public static class ScanQRCode
             var operatingSystem = osInfo.ToString();
             var browserInfo = browserName;
             var capturedDeviceType = deviceType;
-            try
-            {
-                country = iPAddress?.GetCountryName() ?? "Unknown";
-            }
-            catch (Exception ex)
-            {
-                logger.LogWarning(ex, "Failed to get country from IP Address {IpAddress}", iPAddress);
-            }
-
             _ = Task.Run(async () =>
             {
                 try
                 {
+                    try
+                    {
+                        country = iPAddress?.GetCountryName() ?? "Unknown";
+                    }
+                    catch (Exception ex)
+                    {
+                        logger.LogWarning(ex, "Failed to get country from IP Address {IpAddress}", iPAddress);
+                    }
                     await using var scope = scopeFactory.CreateAsyncScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
