@@ -187,9 +187,10 @@ flowchart TD
 
 ### Database
 
-* **Primary DB:** **PostgreSQL**. An open-source, robust relational database.
-    * **Decision (Relational vs. NoSQL):** Selected over NoSQL to ensure Data Integrity (enforcing strict User → QR → Scan relationships via Foreign Keys) and for its Analytics capabilities (native support for aggregations like `GROUP BY` required for the dashboard).
-* **ORM:** **Entity Framework Core**. Simplifies database interactions and migrations.
+- **Primary DB:** **PostgreSQL**. An open-source, robust relational database.
+- **ORM:** **Entity Framework Core**. Simplifies database interactions and migrations.
+
+- **Decision (Relational vs. NoSQL):** SQL selected over NoSQL to ensure Data Integrity (enforcing strict User → QR → Scan relationships via Foreign Keys) and for its Analytics capabilities (native support for aggregations like `GROUP BY` required for the dashboard).
 
 ### Deployment
 
@@ -236,6 +237,100 @@ flowchart TD
   1.  User loads the landing page.
   2.  User logs in successfully.
   3.  User creates a QR code and verifies it appears in the list.
- 
+
 ### Test Execution Results
+
 <img width="574" height="903" alt="Screenshot 2025-12-13 233036" src="https://github.com/user-attachments/assets/4909b9f3-946d-44a3-8a29-a1dd7afa166d" />
+
+Based on the provided files and your request, here is the **How to Run** chapter formatted to match your existing documentation style. I have verified the commands against the `docker/compose.yaml`, `Dockerfile`, and `package.json` files you uploaded.
+
+---
+
+## 7. How to Run
+
+### Production Environment
+
+1. **Navigate to the Docker folder:**
+
+```bash
+cd ./docker
+```
+
+2. **Configure Environment Variables:**
+   Copy the template file to create your production environment configuration.
+
+```bash
+cp .env.template .env
+```
+
+3. **Start the Services:**
+   Run the application stack in detached mode.
+
+```bash
+docker compose up -d
+```
+
+4. **Apply Database Migrations:**
+   Execute the self-contained migration bundle inside the running backend container.
+
+```bash
+docker exec -it qr-manager-backend-1 sh -c "./appMigration"
+```
+
+### Local Development Environment
+
+#### 1. Database Setup
+
+Ensure you have a PostgreSQL instance running. You can use the provided Docker Compose service for this.
+
+```bash
+cd ./docker
+docker compose up -d pg
+```
+
+#### 2. Frontend Setup
+
+1. Navigate to the frontend directory:
+
+```bash
+cd ./frontend
+```
+
+2. Install the dependencies:
+
+```bash
+npm install --legacy-peer-deps
+```
+
+3. Start the development server:
+
+```bash
+npm run dev
+```
+
+#### 3. Backend Setup
+
+1. **Prerequisites:** Ensure **.NET SDK 8.0** is installed.
+2. Install the **Entity Framework Core Global Tool** (if not already installed):
+
+```bash
+dotnet tool install --global dotnet-ef
+```
+
+3. Navigate to the backend API project folder:
+
+```bash
+cd ./backend/src/Api
+```
+
+4. Update the database schema:
+
+```bash
+dotnet ef database update --context AppDbContext
+```
+
+5. Run the API in watch mode:
+
+```bash
+dotnet watch
+```
