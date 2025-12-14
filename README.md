@@ -199,6 +199,7 @@ flowchart TD
 - **Framework:** **Vue.js 3** (Composition API). Chosen for its lightweight nature and reactivity.
 - **UI Library:** **Quasar Framework**. chosen for its comprehensive component library (Material Design) and out-of-the-box responsive grid, significantly speeding up solo development.
 - **State Management:** **Pinia**. The modern standard for Vue state management.
+- **Internationalization:** **vue-i18n**. Used for handling multi-language support.
 - **API Client:** **openapi-fetch** & **openapi-typescript**. Selected for lightweight, zero-runtime-overhead type safety. It automatically synchronizes TypeScript interfaces with the Backend's Swagger definition, eliminating manual type declaration.
 - **Charts:** **ApexCharts**.
 - **QR Generation**: **qr-code-styling**. Selected for its rich customization options and client-side rendering capabilities, enabling real-time preview of QR designs directly in the browser.
@@ -240,6 +241,12 @@ flowchart TD
   1.  **Dashboard:** Displays aggregate statistics using ApexCharts.
   2.  **QR Builder:** A reactive form where users input a URL and see a live preview of the QR code styles.
   3.  **QR List:** A data table with pagination and sorting to manage existing codes.
+
+- **Internationalization (i18n):**
+  * **Translation:** The application uses **vue-i18n** for custom application strings (English and Slovak) while simultaneously handling **Quasar Language Packs**.
+  * **Dynamic Loading:** A custom boot script (`boot/i18n.ts`) dynamically imports the specific Quasar language file (e.g., `en-US.mjs` or `sk.mjs`) matching the user's selection. This ensures that internal framework components, such as pagination labels, table headers, and date pickers are translated alongside the main content.
+  * **Persistence:** User language preference is persisted in `localStorage` using `@vueuse/core`, ensuring the setting remains active across sessions.
+
 
 - **Type-Safe API Integration:**
   * **Schema Generation:** The project leverages **OpenAPI (Swagger)** to maintain a strict contract between Client and Server. The `npm run generate-openapi-schema` script uses **openapi-typescript** to scan the running Backend's `swagger.json` and generate precise TypeScript definitions (`src/api/generated/schema.d.ts`).
