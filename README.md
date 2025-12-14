@@ -201,6 +201,7 @@ flowchart TD
 - **State Management:** **Pinia**. The modern standard for Vue state management.
 - **API Client:** **openapi-fetch** & **openapi-typescript**. Selected for lightweight, zero-runtime-overhead type safety. It automatically synchronizes TypeScript interfaces with the Backend's Swagger definition, eliminating manual type declaration.
 - **Charts:** **ApexCharts**.
+- **QR Generation**: **qr-code-styling**. Selected for its rich customization options and client-side rendering capabilities, enabling real-time preview of QR designs directly in the browser.
 
 ### Backend
 
