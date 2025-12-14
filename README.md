@@ -186,6 +186,10 @@ flowchart TD
 - **Vertical Slice Architecture (Backend):** Instead of distinct layers (Controller -\> Service -\> Repo), the app is organized by **Features** (e.g., `Features/Auth`, `Features/QRCodes`). This keeps related logic (Commands, Queries, Validators) together, reducing coupling and making maintenance easier.
 - **CQRS (Command Query Responsibility Segregation):** Implemented via **MediatR**. This separates read operations (Analytics) from write operations (Creating QRs/Scanning), allowing for optimized query handlers.
 
+<img width="387" height="252" alt="Picture0030" src="https://github.com/user-attachments/assets/73560ddf-c889-404d-aca2-eed404e8bf67" alt="Vertical Slice Architecture"/>
+
+<em>Source: <a href="[https://www.jimmybogard.com/vertical-slice-architecture/](https://www.jimmybogard.com/vertical-slice-architecture/)">[https://www.jimmybogard.com/vertical-slice-architecture/](https://www.jimmybogard.com/vertical-slice-architecture/)</a></em>
+
 ---
 
 ## 4\. Tech Stack Analysis
