@@ -57,7 +57,7 @@ Standard QR codes are static. Once printed, the destination URL cannot be change
 
 ### High-Level Architecture
 
-The system follows a **Client-Server** architecture tailored with **Vertical Slice Architecture** on the backend.
+The system follows a **Client-Server** architecture.
 
 ```mermaid
 graph TD
@@ -237,7 +237,68 @@ flowchart TD
   3.  **QR List:** A data table with pagination and sorting to manage existing codes.
 - **UX Flow:** The application uses `vue-router` with route guards (`requiresAuth`) to protect private pages. Toast notifications (`vue3-toastify`) provide feedback for actions.
 
----
+
+### Repository Structure
+The project is organized as a monorepo containing the Backend API, Frontend SPA, and Docker infrastructure configuration.
+
+#### 1. Root & Infrastructure (`/` & `/docker`)
+The root directory contains project documentation, while the `docker` folder handles orchestration. The `caddy` subdirectory explicitly configures the reverse proxy layer, defining how incoming HTTP requests are routed to the frontend and backend services.
+
+```text
+/
+├── docker/
+│   ├── caddy/              # Caddy Reverse Proxy setup
+│   │   ├── Caddyfile.template # Configuration template (routing & headers)
+│   │   └── compose.caddy.yaml # Separate Compose service definition for Caddy
+│   ├── .env.template       # Environment variable template
+│   └── compose.yaml        # Main Docker Compose orchestration
+└── README.md               # Project documentation
+```
+
+#### 2. Backend (`/backend`)
+The backend follows **Vertical Slice Architecture**. Instead of technical layers, the code is organized by **Features**.
+
+```text
+backend/
+├── src/Api/
+│   ├── Common/             # Shared logic (Errors, Pagination, Utils)
+│   ├── Data/               # DB Context & EF Core Migrations
+│   ├── Features/           # Vertical Slices (CQRS Implementation)
+│   │   ├── Auth/           # Login, Register, Refresh Token logic
+│   │   ├── QRCodes/        # CRUD operations for QR Codes
+│   │   └── QRScanRecords/  # Scanning logic & Analytics queries
+│   ├── Extensions/         # Extension methods (IQueryable, Claims)
+│   ├── Program.cs          # App entry point & Middleware config
+│   └── appsettings.json    # Configuration
+└── tests/
+    ├── Api.IntegrationTests/ # Full flow tests using Testcontainers
+    └── Api.UnitTests/        # Isolated unit tests (xUnit)
+```
+
+#### 3. Frontend (`/frontend`)
+The frontend is built with **Vue 3** and **Quasar**, following a standard modular structure.
+
+```text
+frontend/
+├── public/                 # Static assets (Icons, Favicons)
+├── src/
+│   ├── api/                # Generated Typescript services for API
+│   ├── assets/             # Images & dynamic shapes for QR generation
+│   ├── boot/               # Initialization scripts (i18n, Google Login)
+│   ├── components/         # Reusable UI components
+│   │   ├── analytics/      # Charts & Stats views
+│   │   ├── core/           # Shared UI (Dialogs, Search, Sidebar)
+│   │   └── qr-codes/       # QR Builder & Preview components
+│   ├── layouts/            # MainLayout (Sidebar) & PageLayout
+│   ├── pages/              # Route views (Dashboard, Login, Edit QR)
+│   ├── stores/             # Pinia state stores (Auth, etc.)
+│   ├── utils/              # Helper functions (Date formatting, Validators)
+│   └── router/             # Vue Router configuration
+└── tests/
+    ├── integration/        # E2E tests using Playwright
+    └── unit/               # Unit tests using Vitest
+```
+
 
 ## 6\. Testing
 
@@ -262,8 +323,6 @@ flowchart TD
 ### Test Execution Results
 
 <img width="574" height="903" alt="Screenshot 2025-12-13 233036" src="https://github.com/user-attachments/assets/4909b9f3-946d-44a3-8a29-a1dd7afa166d" />
-
-Based on the provided files and your request, here is the **How to Run** chapter formatted to match your existing documentation style. I have verified the commands against the `docker/compose.yaml`, `Dockerfile`, and `package.json` files you uploaded.
 
 ---
 
