@@ -214,7 +214,6 @@ flowchart TD
 
 - **Primary DB:** **PostgreSQL**. An open-source, robust relational database.
 - **ORM:** **Entity Framework Core**. Simplifies database interactions and migrations.
-
 - **Decision (Relational vs. NoSQL):** SQL selected over NoSQL to ensure Data Integrity (enforcing strict User → QR → Scan relationships via Foreign Keys) and for its Analytics capabilities (native support for aggregations like `GROUP BY` required for the dashboard).
 
 ### Deployment
