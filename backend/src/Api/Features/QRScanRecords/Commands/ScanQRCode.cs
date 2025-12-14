@@ -1,5 +1,4 @@
 using System.Net;
-using System.Security.Claims;
 using Carter;
 using DeviceDetectorNET;
 using DeviceDetectorNET.Parser;
@@ -8,7 +7,6 @@ using Fei.Is.Api.Data.Contexts;
 using Fei.Is.Api.Data.Enums;
 using Fei.Is.Api.Data.Models;
 using Fei.Is.Api.Extensions;
-using Fei.Is.Api.Features.QRCodes.Extensions;
 using FluentResults;
 using MediatR;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -30,13 +28,10 @@ public static class ScanQRCode
                         var result = await mediator.Send(query);
 
                         if (result.HasError<NotFoundError>())
-                        {
                             return TypedResults.NotFound();
-                        }
+
                         if (result.HasError<ForbiddenError>())
-                        {
                             return TypedResults.Forbid();
-                        }
 
                         return TypedResults.Redirect(result.Value.RedirectUrl);
                     }
@@ -59,50 +54,50 @@ public static class ScanQRCode
     {
         public async Task<Result<Response>> Handle(Query request, CancellationToken cancellationToken)
         {
-            var qrCode = await context.QRCodes.AsNoTracking().FirstOrDefaultAsync(qrCode => qrCode.ShortCode == request.ShortCode, cancellationToken);
+            var qrCode = await context.QRCodes.AsNoTracking().FirstOrDefaultAsync(q => q.ShortCode == request.ShortCode, cancellationToken);
 
-            if (qrCode == null)
-            {
+            if (qrCode is null)
                 return Result.Fail(new NotFoundError());
-            }
-
-            var headers = request.Context.Request.Headers.ToDictionary(a => a.Key, a => a.Value.ToArray().FirstOrDefault());
-
-            var clientHints = ClientHints.Factory(headers);
-            var dd = new DeviceDetector(request.Context.Request.Headers["User-Agent"], clientHints);
-            dd.SkipBotDetection();
-            dd.Parse();
-
-            var clientInfo = dd.GetClient();
-            var osInfo = OperatingSystemParser.GetOsFamily(dd.GetOs().Match?.Name ?? "Unknown");
-            var browserName = clientInfo.Match?.Name ?? "Unknown";
-
-            var deviceType = DeviceType.Other;
-            if (dd.IsDesktop())
-                deviceType = DeviceType.Desktop;
-            else if (dd.IsTablet())
-                deviceType = DeviceType.Tablet;
-            else if (dd.IsMobile())
-                deviceType = DeviceType.Mobile;
 
             var qrCodeId = qrCode.Id;
-            var iPAddress = request.Context.GetClientIpAddress();
-            var country = "Unknown";
-            var operatingSystem = osInfo.ToString();
-            var browserInfo = browserName;
-            var capturedDeviceType = deviceType;
+            var ipAddress = request.Context.GetClientIpAddress();
+
+            var headersSnapshot = request.Context.Request.Headers.ToDictionary(h => h.Key, h => h.Value.ToString());
+
             _ = Task.Run(async () =>
             {
                 try
                 {
+                    var clientHints = ClientHints.Factory(headersSnapshot);
+                    headersSnapshot.TryGetValue("User-Agent", out var userAgent);
+                    userAgent ??= string.Empty;
+
+                    var dd = new DeviceDetector(userAgent, clientHints);
+                    dd.SkipBotDetection();
+                    dd.Parse();
+
+                    var clientInfo = dd.GetClient();
+                    var osInfo = OperatingSystemParser.GetOsFamily(dd.GetOs().Match?.Name ?? "Unknown");
+                    var browserName = clientInfo.Match?.Name ?? "Unknown";
+
+                    var deviceType = DeviceType.Other;
+                    if (dd.IsDesktop())
+                        deviceType = DeviceType.Desktop;
+                    else if (dd.IsTablet())
+                        deviceType = DeviceType.Tablet;
+                    else if (dd.IsMobile())
+                        deviceType = DeviceType.Mobile;
+
+                    var country = "Unknown";
                     try
                     {
-                        country = iPAddress?.GetCountryName() ?? "Unknown";
+                        country = ipAddress?.GetCountryName() ?? "Unknown";
                     }
                     catch (Exception ex)
                     {
-                        logger.LogWarning(ex, "Failed to get country from IP Address {IpAddress}", iPAddress);
+                        logger.LogWarning(ex, "Failed to get country from IP Address {IpAddress}", ipAddress);
                     }
+
                     await using var scope = scopeFactory.CreateAsyncScope();
                     var db = scope.ServiceProvider.GetRequiredService<AppDbContext>();
 
@@ -111,17 +106,16 @@ public static class ScanQRCode
                         {
                             QRCodeId = qrCodeId,
                             Country = country,
-                            OperatingSystem = operatingSystem,
-                            BrowserInfo = browserInfo,
-                            DeviceType = capturedDeviceType,
+                            OperatingSystem = osInfo.ToString(),
+                            BrowserInfo = browserName,
+                            DeviceType = deviceType,
                         }
                     );
 
-                    await db.SaveChangesAsync();
+                    await db.SaveChangesAsync().ConfigureAwait(false);
                 }
                 catch (Exception ex)
                 {
-                    // Swallow to never affect redirect, but log so you can diagnose failures
                     logger.LogWarning(ex, "Failed to persist scan record for QRCodeId {QRCodeId}", qrCodeId);
                 }
             });
