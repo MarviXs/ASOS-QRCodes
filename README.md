@@ -199,6 +199,7 @@ flowchart TD
 - **Framework:** **Vue.js 3** (Composition API). Chosen for its lightweight nature and reactivity.
 - **UI Library:** **Quasar Framework**. chosen for its comprehensive component library (Material Design) and out-of-the-box responsive grid, significantly speeding up solo development.
 - **State Management:** **Pinia**. The modern standard for Vue state management.
+- **API Client:** **openapi-fetch** & **openapi-typescript**. Selected for lightweight, zero-runtime-overhead type safety. It automatically synchronizes TypeScript interfaces with the Backend's Swagger definition, eliminating manual type declaration.
 - **Charts:** **ApexCharts**.
 
 ### Backend
@@ -238,6 +239,13 @@ flowchart TD
   1.  **Dashboard:** Displays aggregate statistics using ApexCharts.
   2.  **QR Builder:** A reactive form where users input a URL and see a live preview of the QR code styles.
   3.  **QR List:** A data table with pagination and sorting to manage existing codes.
+
+- **Type-Safe API Integration:**
+  * **Schema Generation:** The project leverages **OpenAPI (Swagger)** to maintain a strict contract between Client and Server. The `npm run generate-openapi-schema` script uses **openapi-typescript** to scan the running Backend's `swagger.json` and generate precise TypeScript definitions (`src/api/generated/schema.d.ts`).
+  * **Client Usage:** **openapi-fetch** serves as the HTTP client. Unlike traditional clients (like Axios), it uses the generated schema to provide IntelliSense and compile-time error checking for API paths, parameters, and response bodies.
+  * **Auth Wrapper:** A custom wrapper (`src/api/client.ts`) intercepts requests to inject **JWT Bearer** tokens and handles **401 Unauthorized** responses by automatically triggering the Refresh Token flow and retrying the request seamlessly.
+
+
 - **UX Flow:** The application uses `vue-router` with route guards (`requiresAuth`) to protect private pages. Toast notifications (`vue3-toastify`) provide feedback for actions.
 
 
