@@ -76,6 +76,22 @@ classDiagram
         +Guid Id
         +String Email
         +String PasswordHash
+        +DateTimeOffset RegistrationDate
+    }
+    class ApplicationRole {
+        +Guid Id
+        +String Name
+    }
+    class ApplicationUserRole {
+        +Guid UserId
+        +Guid RoleId
+    }
+    class RefreshToken {
+        +Guid Id
+        +Guid Token
+        +Guid UserId
+        +long ExpiresAt
+        +long CreatedAt
     }
     class QRCode {
         +Guid Id
@@ -92,8 +108,13 @@ classDiagram
         +String Browser
         +Guid QRCodeId
     }
+
     ApplicationUser "1" --> "*" QRCode : Owns
     QRCode "1" --> "*" ScanRecord : Has
+    ApplicationUser "1" --> "*" RefreshToken : Has
+    ApplicationUser "1" --> "*" ApplicationUserRole : Has
+    ApplicationRole "1" --> "*" ApplicationUserRole : Has
+
 ```
 
 ### Use Case Diagram
